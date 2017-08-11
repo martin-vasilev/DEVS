@@ -10,11 +10,14 @@ Created on Sun Jun 11 23:00:56 2017
 #  General settings:  #
 #---------------------#
 lab= True
-checkPPL= False # draws a rectangle around sentence to make sure letter width is correct
+checkPPL= True # draws a rectangle around sentence to make sure letter width is correct
 expName = "DEVS" # used for saving data (keep short)
 expDir= 'C:\Users\Martin Vasilev\Dropbox\pyTrack'
-corpusFile= "C:\\Users\\Experimenter\\Desktop\\Martin Vasilev\\WinPython-PyGaze-0.5.1\sentences.txt"
+corpusFile= "C:\Users\EyeTracker\Desktop\Martin Vasilev\WinPython-PyGaze-0.5.1\Devs\sentences.txt"
 #eyedatafile= 'test.edf'
+
+# At 14 ppl, 1 letter subtends 0.3446 deg per visual angle (3 letters= 1.0338)
+# With 50 pixel offset, screen fits max 133 characters
 
 #---------------------#
 #  Display settings:  #
@@ -49,6 +52,8 @@ gazeBoxDur= 100 # how many ms the eye needs to stay on the gaze box before trigg
 gazeBoxDisplayTime= 7 # how many seconds to wait to trigger the gaze box
 TrialTimeout= 60
 ncond=4
+Maxtrials= 120
+soundDur= 0.06
 
 expSetup = {'Participant': '',
            'Condition (Randomize)': ''}
@@ -119,6 +124,7 @@ def GetTextDimensions(text, points, font):
 # PLEASE NOTE: this has been tested only with Courier New; use at own risk with other fonts
 Pix_per_Letter= GetTextDimensions("a", TextSize, Font)[0]+2
 
+print(Pix_per_Letter)
 
 def getSent(corpusFile, ncond, start):
 	with open(corpusFile, 'r') as f:
@@ -147,11 +153,154 @@ def getBnds(sent, sentPos, Pix_per_Letter):
 	for i in range(0, len(pos)):
 		Bnd.append(sentPos[0]+ pos[i]*Pix_per_Letter+Pix_per_Letter)
 	return(Bnd)
+
+
+def get_design(ID):
+	
+	import os
+	
+	if not os.path.exists('Design'):
+	    os.makedirs('Design')
+	
+	#ID= 48
+	nsent= 120
+	ncond= 3
+	npos= 4 # num of target word positions
+	
+	item= range(1,nsent+1)
+	
+	S1= [1, 4, 7, 10, 13, 16, 19, 22, 25, 28, 31, 34, 37, 40, 43, 46]
+	S2= [2, 5, 8, 11, 14, 17, 20, 23, 26, 29, 32, 35, 38, 41, 44, 47]
+	S3= [3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36, 39, 42, 45, 48]
+	
+	P1= [1, 2, 3, 13, 14, 15, 25, 26, 27, 37, 38, 39]
+	P2= [4, 5, 6, 16, 17, 18, 28, 29, 30, 40, 41, 42]
+	P3= [7, 8, 9, 19, 20, 21, 31, 32, 33, 43, 44, 45]
+	P4= [10, 11, 12, 22, 23, 24, 34, 35, 36, 46, 47, 48]
+	
+	
+	if ID in S1:
+		sound= ["SLC"]*int((nsent/ncond)) + ["STD"]*int((nsent/ncond)) + ["DEV"]*int((nsent/ncond))	
+		
+	if ID in S2:
+		sound= ["STD"]*int((nsent/ncond)) + ["DEV"]*int((nsent/ncond)) + ["SLC"]*int((nsent/ncond))	
+		
+	if ID in S3:
+		sound= ["DEV"]*int((nsent/ncond)) + ["SLC"]*int((nsent/ncond)) + ["STD"]*int((nsent/ncond))	
+	
+	####
+	
+	if ID in P1:
+		pos= [2, 3, 4, 5]* int(nsent/npos)
+	
+	if ID in P2:
+		pos= [3, 4, 5, 2]* int(nsent/npos)
+		
+	if ID in P3:
+		pos= [4, 5, 2, 3]* int(nsent/npos)
+		
+	if ID in P4:
+		pos= [5, 2, 3, 4]* int(nsent/npos)
 		
 	
+	c= list(zip(item, sound, pos))
+	matching = [s for s in c if s[1]=="SLC"]
+	not_matching= [s for s in c if s[1]!="SLC"]
 	
+	STD = [i for i, s in enumerate(not_matching) if 'STD' in s[1]]
+	first= [not_matching[STD[0]]]+ [not_matching[STD[1]]]+ [not_matching[STD[2]]]
+	del not_matching[STD[0]]
+	del not_matching[STD[1]-1]
+	del not_matching[STD[2]-2]
+	
+	# randomise sounds' block:
+	from random import shuffle
+	shuffle(not_matching)
+	shuffle(matching)
+	
+	pract= [(121, 'PRAC', 1), (122, 'PRAC', 1), (123, 'PRAC', 1), \
+              (124, 'PRAC', 1), (125, 'PRAC', 1), (126, 'PRAC', 1)]
+	shuffle(pract)
+	
+		
+	if ID%2==1: # odd numbers
+		B1= matching
+		B2= not_matching
+		design= pract+ B1+ first+B2
+	else: # even numbers
+		B1= not_matching
+		B2= matching
+		design= pract+ first+B1+B2
+	#print(sound)
+	#print(pos)
+	#print(design)
+	
+	thefile = open('Design/P'+ str(ID)+ '.txt', 'w')
+	thefile.write("item sound pos\n") # columns
+	
+	for item in design:
+	  thefile.write("%s %s %s\n" % item)
+	thefile.close()
+	
+	return(design)
 
 
+def Quest(disp, scr, tracker, item, cond, Question, corr_ans, FGC= (0,0,0), TextSize= 28, Font= 'Courier New'):
+	from psychopy import event
+	from psychopy.core import wait
+	#import pylink	
+	
+	allowedResp= ['y', 'n']
+	#allowedResp= [1, 2, 3, 4]
+	answered= False
+	
+	# Initial question stamps:
+	tracker.log('TRIALID F%dI%dD1' % (cond, item))
+	tracker.log('QUESTION_ANSWER %d' % (corr_ans))
+	tracker.log('DELAY 500 MS')
+	tracker.start_recording()
+	wait(0.05)
+	tracker.status_msg('Question F%dI%dD1' % (cond, item)) 
+	wait(0.5)
+	tracker.log('DISPLAY ON')
+	tracker.log('SYNCTIME')
+	
+	##################
+	scr.draw_text(text= Question, colour= FGC, font= Font, center=True, fontsize=TextSize)
 
-
+	disp.fill(scr)
+	disp.show()	
+	
+	#d = pylink.getEYELINK().getLastButtonPress()
+	#print(d)
+	
+	###	
+	while not answered:
+		pressed= event.getKeys()
+		if any(i in pressed for i in allowedResp):
+			answered= True	
+			#ans= int(pressed[0])
+			if pressed[0]=="n":
+				ans= 0
+			else:
+				ans= 1
+			tracker.stop_recording()
+		
+#		pressed, time= pylink.getEYELINK().getLastButtonPress()
+#		if any(i in str(pressed) for i in allowedResp):
+#			answered= True	
+#			ans= int(pressed)
+#			print(ans)
+#			tracker.stop_recording()
+			
+	# clear screen:
+	scr.clear()
+	disp.fill(scr)
+	disp.show()
+	
+	# Print end of question stamps to edf:
+	tracker.log('ENDBUTTON %d' % (ans))
+	tracker.log('DISPLAY OFF')
+	tracker.log('TRIAL_RESULT %d' % (ans))
+	tracker.log('TRIAL OK')
 

@@ -11,7 +11,7 @@ Eye-tracking experiment following Eyetrack's convention
 
 # import settings and libraries:
 from constants import * # all experiment settings
-import pylink
+#import pylink
 from psychopy import prefs
 prefs.general['audioLib']= ['pygame']
 from psychopy.visual import *
@@ -67,6 +67,10 @@ tracker.calibrate()
 # Experimental trials:
 #-------------------------
 
+design= get_design(int(expSetup['Participant']))
+
+hasQuest= False
+
 (corpus,condition,ID)= getSent(corpusFile, ncond, int(expSetup["Condition (Randomize)"]))
 ntrials= len(ID)
 
@@ -92,24 +96,38 @@ for i in range(0, ntrials): # for each of the trials
 	boundary4Crossed= False
 	boundary5Crossed= False
 	
+	# time sound was played
+	tPlay1= 0
+	tPlay2= 0
+	tPlay3= 0
+	tPlay4= 0
+	#tPlay5= 0	
+	
+	# time elapsed since sound was played
+	tSound1= 0
+	tSound2= 0
+	tSound3= 0
+	tSound4= 0
+	#tSound5= 0
+	
 	# if number of sounds to be played not known in advance, take max boundaries for longest sentence.
 	# Then, here, say: if boundary n doesn't exists: Boundary n crossed== True (i.e. nothing happens during trial)
 	
       # get sounds:
 	if cond<4:
-		sound1= Sound(value=500, secs= 0.05)
-		sound2= Sound(value=500, secs= 0.05)
-		sound3= Sound(value=500, secs= 0.05)
-		sound4= Sound(value=500, secs= 0.05)
-		sound5= Sound(value=500, secs= 0.05)
+		sound1= Sound('standard.wav')
+		sound2= Sound('standard.wav')
+		sound3= Sound('standard.wav')
+		sound4= Sound('standard.wav')
+		sound5= Sound('standard.wav')
 		
 		sound_type= ["STD", "STD", "STD", "STD", "STD"]
 	else:
-		sound1= Sound(value=500, secs= 0.05)
-		sound2= Sound(value=500, secs= 0.05)
-		sound3= Sound(value=500, secs= 0.05)
-		sound4= Sound(value=500, secs= 0.05)
-		sound5= Sound(value=5000, secs= 0.05)
+		sound1= Sound('standard.wav')
+		sound2= Sound('standard.wav')
+		sound3= Sound('standard.wav')
+		sound4= Sound('standard.wav')
+		sound5= Sound('deviant.wav')
 
 		sound_type= ["STD", "STD", "STD", "DEV", "STD"]
 						
@@ -119,9 +137,15 @@ for i in range(0, ntrials): # for each of the trials
 	while not stimuliOn: # repeats loop until gazebox is triggered within x seconds
 	
 		#print trial ID in EDF file:
-		tracker.log('TRIALID E%dI%dD0' % (cond, item))
-		# print trial ID on tracker screen:
-		tracker.status_msg('TRIAL E%dI%dD0 (%d out of %d)' % (item, cond, i+1, ntrials)) 
+		
+		if item> Maxtrials:
+			tracker.log('TRIALID P%dI%dD0' % (cond, item))
+			# print trial ID on tracker screen:
+			tracker.status_msg('TRIAL P%dI%dD0 (%d out of %d)' % (item, cond, i+1, ntrials)) 
+		else:
+			tracker.log('TRIALID E%dI%dD0' % (cond, item))
+			# print trial ID on tracker screen:
+			tracker.status_msg('TRIAL E%dI%dD0 (%d out of %d)' % (item, cond, i+1, ntrials)) 
 		
 		# print boundary location:
 		#tracker.log('BOUNDARY@ %d' % (boundary))
@@ -230,6 +254,8 @@ for i in range(0, ntrials): # for each of the trials
 	trialStart= globalClock.getTime()
 	
 
+	soundPlayed= False
+	
 	while not trialEnd:
 		trialTime= globalClock.getTime()- trialStart
 		trialEnd= myMouse.getPressed()[0] # terminate trial when mouse is clicked (temporary)
@@ -237,35 +263,84 @@ for i in range(0, ntrials): # for each of the trials
 		#===========================
 		xpos= tracker.sample()[0]
            
+		# SOUND 1:
 		if xpos> boundary1 and not boundary1Crossed:
-			pylink.getEYELINK().sendMessage("BOUNDARY CROSSED 1")
+			tracker.log("BOUNDARY CROSSED 1")
 			boundary1Crossed= True
    			sound1.play()
-			pylink.getEYELINK().sendMessage("PLAY SOUND " + sound_type[0])
-
+			tracker.log("PLAY SOUND " + sound_type[0])
+			tPlay1= globalClock.getTime()
+		tSound1= globalClock.getTime()- tPlay1
+		
+		
+		# SOUND 2:
 		if xpos> boundary2 and not boundary2Crossed:
-			pylink.getEYELINK().sendMessage("BOUNDARY CROSSED 2")
-			boundary2Crossed= True
-   			sound2.play()
-			pylink.getEYELINK().sendMessage("PLAY SOUND " + sound_type[1])
+			if tSound1> soundDur:
+				tracker.log("BOUNDARY CROSSED 2")
+				boundary2Crossed= True
+	   			sound2.play()
+				tracker.log("PLAY SOUND " + sound_type[1])
+			else:
+				wait(soundDur-tSound1)
+				tracker.log("BOUNDARY CROSSED 2")
+				boundary2Crossed= True
+	   			sound2.play()
+				tracker.log("PLAY SOUND " + sound_type[1])
+				tracker.log("SOUND_DELAYED 2")
+			tPlay2= globalClock.getTime()
+		tSound2= globalClock.getTime()- tPlay2
 
+
+		# SOUND 3:
 		if xpos> boundary3 and not boundary3Crossed:
-			pylink.getEYELINK().sendMessage("BOUNDARY CROSSED 3")
-			boundary3Crossed= True
-   			sound3.play()
-			pylink.getEYELINK().sendMessage("PLAY SOUND " + sound_type[2])
-
+			if tSound2> soundDur:
+				tracker.log("BOUNDARY CROSSED 3")
+				boundary3Crossed= True
+	   			sound3.play()
+				tracker.log("PLAY SOUND " + sound_type[2])
+			else:
+				wait(soundDur-tSound2)
+				tracker.log("BOUNDARY CROSSED 3")
+				boundary3Crossed= True
+	   			sound3.play()
+				tracker.log("PLAY SOUND " + sound_type[2])
+				tracker.log("SOUND_DELAYED 3")
+			tPlay3= globalClock.getTime()
+		tSound3= globalClock.getTime()- tPlay3
+		
+		
+		# SOUND 4:
 		if xpos> boundary4 and not boundary4Crossed:
-			pylink.getEYELINK().sendMessage("BOUNDARY CROSSED 4")
-			boundary4Crossed= True
-   			sound4.play()
-			pylink.getEYELINK().sendMessage("PLAY SOUND " + sound_type[3])
+			if tSound3> soundDur:
+				tracker.log("BOUNDARY CROSSED 4")
+				boundary4Crossed= True
+	   			sound4.play()
+				tracker.log("PLAY SOUND " + sound_type[3])
+			else:
+				wait(soundDur-tSound3)
+				tracker.log("BOUNDARY CROSSED 4")
+				boundary4Crossed= True
+	   			sound4.play()
+				tracker.log("PLAY SOUND " + sound_type[3])
+				tracker.log("SOUND_DELAYED 4")
+			tPlay4= globalClock.getTime()
+		tSound4= globalClock.getTime()- tPlay4
 
+		
+		# SOUND 5:
 		if xpos> boundary5 and not boundary5Crossed:
-			pylink.getEYELINK().sendMessage("BOUNDARY CROSSED 5")
-			boundary5Crossed= True
-   			sound5.play()
-			pylink.getEYELINK().sendMessage("PLAY SOUND " + sound_type[4])
+			if tSound4> soundDur:
+				tracker.log("BOUNDARY CROSSED 5")
+				boundary5Crossed= True
+	   			sound5.play()
+				tracker.log("PLAY SOUND " + sound_type[4])
+			else:
+				wait(soundDur-tSound4)
+				tracker.log("BOUNDARY CROSSED 5")
+				boundary5Crossed= True
+	   			sound5.play()
+				tracker.log("PLAY SOUND " + sound_type[4])
+				tracker.log("SOUND_DELAYED 5")
 
 
 		if trialTime> TrialTimeout: # end trial automatically if no response by participant
@@ -283,6 +358,9 @@ for i in range(0, ntrials): # for each of the trials
 	tracker.log('TRIAL_RESULT 5')
 	tracker.log('TRIAL OK')
 	tracker.stop_recording()
+	
+	if hasQuest:
+		Quest(disp, scr, tracker, item, cond, "Is this question correct? Yes/ No", 1)
 
 tracker.close()
 disp.close()
