@@ -95,7 +95,8 @@ soundCheck<- function(list_asc = "preproc/files.txt", maxtrial=120, nsounds=5, p
   
   data<- NULL
   temp<- data.frame(sub=NA, item=NA, cond=NA, seq=NA, trialStart= NA, trialEnd= NA, sound= NA, sound_type=NA, regionS= NA, regionE=NA,
-                    regionN1= NA,tBnd= NA, delBnd=NA, prevFix=NA, nextFix=NA, prevGood=NA, onTarget=NA, inRegion=NA, hook= NA)
+                    regionN1= NA,tBnd= NA,tSFIX=NA, nextFlag= NA, delBnd=NA, delFix=NA, prevFix=NA, nextFix=NA, prevGood=NA, onTarget=NA,
+                    inRegion=NA, hook= NA, blink=NA)
   
   
   for(i in 1:length(asc)){ # for each subject..
@@ -126,6 +127,9 @@ soundCheck<- function(list_asc = "preproc/files.txt", maxtrial=120, nsounds=5, p
       bnds<- which(grepl('BOUNDARY CROSSED', trialF))
       bnds<- trialF[bnds]
       
+      if(length(bnds)==0){
+        next
+      }
       
       for(k in 1:length(bnds)){
         # generic info about trial:
@@ -168,6 +172,7 @@ soundCheck<- function(list_asc = "preproc/files.txt", maxtrial=120, nsounds=5, p
           temp$delBnd<- NA
         }
         
+        
         ####
         # previous fixation:
         allfix<- which(grepl('EFIX', trialF[1:s]))
@@ -186,6 +191,33 @@ soundCheck<- function(list_asc = "preproc/files.txt", maxtrial=120, nsounds=5, p
         nextfix<- nextfix[1] # always next fix
         nextfix<- trialF[s+nextfix-1]
         temp$nextFix<- as.numeric(unlist(strsplit(nextfix, "\t"))[4])
+        
+        
+        #####
+        # Time between crossing boundary and SFIX flag:
+        nextSFIX<- which(grepl('SFIX', trialF[s:length(trialF)]))
+        nextSFIX<- nextSFIX[1] # always next fix
+        nextSFIX<- trialF[s+nextSFIX-1]
+        temp$tSFIX<- get_num(nextSFIX)
+        
+        # delay:
+        temp$delFix<- temp$tSFIX- temp$tBnd
+        
+        
+        #####
+        # What was the next flag after crossing the boundary?
+        nextESACC<- which(grepl('ESACC' , trialF[s:length(trialF)]))
+        nextEFIX<- which(grepl('EFIX' , trialF[s:length(trialF)]))
+        
+        if(nextESACC[1]<nextEFIX[1]){
+          type<- 'ESACC'
+          stamp<- nextESACC[1]
+        } else{
+          type<- 'EFIX'
+          stamp<- nextEFIX[1]
+        }
+        temp$nextFlag<- type
+        
         
         ###
         # previous fixation not on empty space?
@@ -226,14 +258,32 @@ soundCheck<- function(list_asc = "preproc/files.txt", maxtrial=120, nsounds=5, p
           temp$hook<- "No"
         }
         
+        ######
+        # Target word blink?
+        allblinks<- which(grepl('SBLINK' , trialF))
+        allblinks<- allblinks-1 # get previous stamp that contains x pixel location
+        allblinks<- trialF[allblinks]
+        xposB<- NA
+        
+        for(l in 1:length(allblinks)){
+          xposB[l]<- get_x(allblinks[l])
+        }
+        
+        targetBlink<- which(xposB >= temp$regionS-ppl & xposB<= temp$regionE)
+        if(length(targetBlink)>0){
+          temp$blink<- "Yes"
+        } else{
+          temp$blink<- "No"
+        }
+        
         
         # add to dataframe:
         data<- rbind(data, temp)
-      }
+      } # end of k loop
       
       
-    }
-  }
+    } # end of j loop
+  } # end if i loop
   
   return(data)
 }
