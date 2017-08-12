@@ -45,3 +45,15 @@ mean(sound_check$delFix)
 
 hist(sound_check$delFix, xlab= "Time until SFIX flag (in ms)", main= "Sound implementation timing")
 abline(v = mean(sound_check$delFix), col= "darkred", lwd=3)
+
+
+
+###############################
+#   Pre-process fixations:    #
+###############################
+
+source("functions/paraFix.R")
+
+raw_fix<- paraFix(plot=F)
+
+

@@ -1,0 +1,59 @@
+
+# Martin R. Vasilev, 2017
+
+paraFix<- function(data_list= "preproc/files.txt", ResX= 1920, ResY=1080, maxtrial= 120, plot=TRUE){
+  
+  # Load functions:
+  source("functions/utility.R")
+  source("functions/plot_fix.R")
+  
+  data<- readLines(data_list)
+
+  raw_fix<- NULL
+  
+  for (i in 1:length(data)){ # for each subject..
+    #  i=1; # temporary
+    
+    cat(sprintf("Processing subject %i", i)); cat("\n")  
+    cat(sprintf("Loading data %s ...", data[i])); 
+    file<- readLines(data[i]) # load file
+    cat(" Done"); cat("\n") 
+    trial_db<- trial_info(file, maxtrial) # extract info about trials to be processed
+    cat("Trial... ")
+    
+    for(j in 1:nrow(trial_db)){ # for each item
+      
+      text<- get_text(file[trial_db$ID[j]:trial_db$start[j]])
+      coords<- get_coord(text)
+      map<- coord_map(coords, x=ResX, y= ResY)
+      raw_fix_temp<- parse_fix(file, map, coords, trial_db[j,], i, ResX, ResY)
+      
+      
+      raw_fix<- rbind(raw_fix, raw_fix_temp) # plot it
+      
+      
+      if(length(raw_fix_temp)>1 & plot==TRUE){ # if data was extracted from trial  
+        # create picture of fixations:
+        plot_fix(coords, raw_fix_temp, i, j, ResX, ResY)
+      }
+      cat(toString(j)); cat(" ")
+    } # end of item loop
+    
+    cat("\n DONE \n \n"); 
+  } # end of subject loop
+  
+  
+  #text<- get_text(file)
+  #coords<- get_coord(text)
+  #map<- coord_map(coords, x=ResX, y= ResY)
+  
+  #raw_fix<- parse_fix(file, map, coords)
+  
+  #cat("Saving data."); 
+  #save(raw_fix, file= "data/raw_fix.Rda"); cat(".")
+  #write.csv(raw_fix, file= "data/raw_fix.csv"); cat(".")
+  cat("\n \n All Done!"); 
+  
+  return(raw_fix)
+  
+}
