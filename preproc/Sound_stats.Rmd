@@ -1,0 +1,72 @@
+---
+title: "Sound stats"
+author: "Martin R Vasilev"
+date: "14 August 2017"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = 'C:/Users/mvasilev/Documents/DEVS')
+```
+
+
+## Data pre-processing:
+
+```{r, echo= FALSE}
+
+load("preproc/sound_check.Rda")
+
+nobs<- nrow(sound_check)
+
+# remove blinks on critical words:
+blinks<- which(sound_check$blink=='Yes')
+nblinks<- length(blinks)
+sound_check<- sound_check[-blinks,]
+
+
+# remove sounds played after fixation has started:
+infix<- which(sound_check$nextFlag=="EFIX" & sound_check$delFix>5)
+infixn<- length(infix)
+sound_check<- sound_check[-infix,]
+
+#cat(sprintf("%d percent of data excluded due to blinks", (nblinks/nobs)*100))
+#cat(sprintf("%d percent of data excluded due to in-fixations", (infixn/nobs)*100))
+#cat(sprintf("%d percent of data remains for analysis", (nrow(sound_check)/nobs)*100))
+
+sound_check<- subset(sound_check, delFix<80)
+
+
+```
+
+- `r (nblinks/nobs)*100` % of data was excluded due to blinks on critical words
+- `r (infixn/nobs)*100` % of data was excluded due to late triggering of the sound (command sent after start of fixation)
+- `r (nrow(sound_check)/nobs)*100` % of data remains for analysis 
+
+## Timing of sound:
+
+Time in ms between sending the command to play sound and the end of the saccade that triggered the sound. Mean: `r mean(sound_check$delFix, na.rm=T)`. SD: `r sd(sound_check$delFix, na.rm=T)`. Range: `r range(sound_check$delFix, na.rm=T)`. 
+
+Note that technology doesn't allow absolute time-locking to the onset of fixation. The reason for this is that Eyelink's algorithm for online parsing of fixations requires about 35 ms to obtain enough samples to detect the start of a fixation. Therefore, if you wait for this flag from the system, the fixation would have already started ~ 35 ms ago. This is clearly too much delay for the present study. The best approach (adopted here) is to trigger the sound as soon as the eye reaches the first pixel of the word. Usually, this happens towards the end of the saccade.The data here shows how many ms passed from triggering the sound and the start of the next fixation. When you add the latency between sending the command to play the sound, and the actual sound coming out from the speakers, this will usually cover the remaining several ms until the end of the saccade. Effectively, this means that, on average, the sound is heard by participant around, or very shortly after, the start of fixation.  
+
+```{r, echo= FALSE}
+hist(sound_check$delFix, xlab= "Time until SFIX flag (in ms)", main= "Sound implementation timing", family= "serif", col="lightgreen", freq=FALSE, breaks=20)
+abline(v = mean(sound_check$delFix, na.rm=T), col= "darkred", lwd=3)
+#curve(dnorm(x, mean=mean(sound_check$delFix, na.rm=T)), sd=sd(sound_check$delFix, na.rm=T), add=TRUE, col="darkblue", lwd=2) 
+
+```
+
+### Inter-stimulus Interval (ISI):
+
+The pace of the sound presentation is determined by participants, in the sense that it depends on how long they fixate words in the sentence. For this reason, it's useful to know what is the average interval between playing to consequitive sounds. Note that this is calculated as the time between the onset of the two sounds (i.e., the time also includes the duration of the first sound- 50 ms). 
+
+Mean: `r mean(sound_check$ISI, na.rm=T)`. SD: `r sd(sound_check$ISI, na.rm=T)`. Range: `r range(sound_check$ISI, na.rm=T)`. 
+
+```{r, echo= FALSE}
+hist(sound_check$ISI, xlab= "ISI between two consequitive sounds", main= "ISI timing", family= "serif", col="lightgreen", freq=FALSE, breaks=20)
+abline(v = mean(sound_check$ISI, na.rm=T), col= "darkred", lwd=3)
+#curve(dnorm(x, mean=mean(sound_check$ISI, na.rm=T)), sd=sd(sound_check$ISI, na.rm=T), add=TRUE, col="darkblue", lwd=2) 
+
+```
