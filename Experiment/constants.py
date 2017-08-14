@@ -55,8 +55,8 @@ ncond=4
 Maxtrials= 120
 soundDur= 0.06
 
-expSetup = {'Participant': '',
-           'Condition (Randomize)': ''}
+expSetup = {'Participant': ''}
+           #'Condition (Randomize)': ''}
 from psychopy import gui
 dlg = gui.DlgFromDict(dictionary=expSetup, title= 'Run experiment: '+ expName)
 LOGFILENAME= expName+ expSetup['Participant']
@@ -96,7 +96,7 @@ def stim2edf(sent, sentPos, tracker):
 	
 	tracker.log('DISPLAY TEXT 1')
 	
-	for i in range(0, len(sent)-1): # print coords of letters on the screen
+	for i in range(0, len(sent)): # print coords of letters on the screen
 		tracker.log('REGION CHAR %d 1 %s %d %d %d %d' % (i, chars[i], x_start[i], y_start, x_end[i], y_end))
 		wait(0.001) # wait time for consitency purposes with Eyetrack
 		tracker.log('DELAY 1 MS')
@@ -304,3 +304,26 @@ def Quest(disp, scr, tracker, item, cond, Question, corr_ans, FGC= (0,0,0), Text
 	tracker.log('TRIAL_RESULT %d' % (ans))
 	tracker.log('TRIAL OK')
 
+
+#######
+
+def openFiles():
+	
+	with open("sent.txt", 'r') as f:
+		corpus= f.readlines()
+		corpus= [x.strip() for x in corpus]
+	
+	with open("quest.txt", 'r') as f:
+		quest= f.readlines()
+		quest= [x.strip() for x in quest]
+	
+	with open("hasQuest.txt", 'r') as f:
+		hasQuest= f.readlines()
+		hasQuest= [x.strip() for x in hasQuest]
+	
+	with open("ans.txt", 'r') as f:
+		ans= f.readlines()
+		ans= [x.strip() for x in ans]
+	
+	return(corpus, quest, hasQuest, ans)
+	
