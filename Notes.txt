@@ -1,2 +1,1 @@
-- Fix number of critical regions printed to asc
-- stim2edf: fullstop is not printed for some reason. CHECK!
+- make sure the correct boundaries are printed on the Eyelink screen
