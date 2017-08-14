@@ -95,7 +95,7 @@ soundCheck<- function(list_asc = "preproc/files.txt", maxtrial=120, nsounds=5, p
   
   data<- NULL
   temp<- data.frame(sub=NA, item=NA, cond=NA, seq=NA, trialStart= NA, trialEnd= NA, sound= NA, sound_type=NA, regionS= NA, regionE=NA,
-                    regionN1= NA,tBnd= NA,tSFIX=NA, nextFlag= NA, delBnd=NA, delFix=NA, prevFix=NA, nextFix=NA, prevGood=NA, onTarget=NA,
+                    regionN1= NA,tBnd= NA,tSFIX=NA, ISI=NA, nextFlag= NA, delBnd=NA, delFix=NA, prevFix=NA, nextFix=NA, prevGood=NA, onTarget=NA,
                     inRegion=NA, hook= NA, blink=NA)
   
   
@@ -204,6 +204,17 @@ soundCheck<- function(list_asc = "preproc/files.txt", maxtrial=120, nsounds=5, p
         temp$delFix<- temp$tSFIX- temp$tBnd
         
         
+        ####
+        # Time from previous sound:
+        if (temp$sound>1){
+          temp$ISI= temp$tBnd- prevSound
+        }else{
+          temp$ISI<-NA
+        }
+        
+        
+        
+        
         #####
         # What was the next flag after crossing the boundary?
         nextESACC<- which(grepl('ESACC' , trialF[s:length(trialF)]))
@@ -275,6 +286,10 @@ soundCheck<- function(list_asc = "preproc/files.txt", maxtrial=120, nsounds=5, p
         } else{
           temp$blink<- "No"
         }
+        
+        ###########
+        prevSound<- temp$tBnd
+        
         
         
         # add to dataframe:
