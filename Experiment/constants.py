@@ -10,7 +10,7 @@ Created on Sun Jun 11 23:00:56 2017
 #  General settings:  #
 #---------------------#
 lab= True
-checkPPL= True # draws a rectangle around sentence to make sure letter width is correct
+checkPPL= False # draws a rectangle around sentence to make sure letter width is correct
 expName = "DEVS" # used for saving data (keep short)
 expDir= 'C:\Users\Martin Vasilev\Dropbox\pyTrack'
 corpusFile= "C:\Users\EyeTracker\Desktop\Martin Vasilev\WinPython-PyGaze-0.5.1\Devs\sentences.txt"
@@ -245,13 +245,13 @@ def get_design(ID):
 	return(design)
 
 
-def Quest(disp, scr, tracker, item, cond, Question, corr_ans, FGC= (0,0,0), TextSize= 28, Font= 'Courier New'):
+def Quest(disp, scr, tracker, item, cond, Question, corr_ans, FGC= (0,0,0), TextSize= 22, Font= 'Courier New'):
 	from psychopy import event
 	from psychopy.core import wait
-	#import pylink	
+	import pylink	
 	
-	allowedResp= ['y', 'n']
-	#allowedResp= [1, 2, 3, 4]
+	#allowedResp= ['y', 'n']
+	allowedResp= ['2', '4']
 	answered= False
 	
 	# Initial question stamps:
@@ -266,32 +266,37 @@ def Quest(disp, scr, tracker, item, cond, Question, corr_ans, FGC= (0,0,0), Text
 	tracker.log('SYNCTIME')
 	
 	##################
-	scr.draw_text(text= Question, colour= FGC, font= Font, center=True, fontsize=TextSize)
+	scr.draw_text(text= Question, colour= FGC, font= Font, center=False, pos= sentPos, fontsize=TextSize)
 
+	scr.draw_text(text= 'YES', colour= 'green', font= Font, center=False, pos= (sentPos[0], sentPos[1]+75), fontsize=TextSize)
+	scr.draw_text(text= 'NO', colour= 'red', font= Font, center=False, pos= (sentPos[0]+300, sentPos[1]+75), fontsize=TextSize)
+	
 	disp.fill(scr)
 	disp.show()	
 	
-	#d = pylink.getEYELINK().getLastButtonPress()
-	#print(d)
 	
 	###	
 	while not answered:
-		pressed= event.getKeys()
-		if any(i in pressed for i in allowedResp):
-			answered= True	
-			#ans= int(pressed[0])
-			if pressed[0]=="n":
-				ans= 0
-			else:
-				ans= 1
-			tracker.stop_recording()
-		
-#		pressed, time= pylink.getEYELINK().getLastButtonPress()
-#		if any(i in str(pressed) for i in allowedResp):
+#		pressed= event.getKeys()
+#		if any(i in pressed for i in allowedResp):
 #			answered= True	
+			#ans= int(pressed[0])
+#			if pressed[0]=="n":
+#				ans= 0
+#			else:
+#				ans= 1
+#			tracker.stop_recording()
+		
+		pressed, time= pylink.getEYELINK().getLastButtonPress()
+		if any(i in str(pressed) for i in allowedResp):
+			answered= True	
 #			ans= int(pressed)
 #			print(ans)
-#			tracker.stop_recording()
+			if pressed==4:
+				ans=1
+			else:
+				ans=0
+			tracker.stop_recording()
 			
 	# clear screen:
 	scr.clear()

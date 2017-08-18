@@ -8,12 +8,13 @@ Eye-tracking experiment following Eyetrack's convention
 
 
 11.08.2017: Added a mechanism to prevent overlap between sounds
+18.08.2017: Added response box subject controls
 """
 
 
 # import settings and libraries:
 from constants import * # all experiment settings
-#import pylink
+import pylink
 from psychopy import prefs
 prefs.general['audioLib']= ['pygame']
 from psychopy.visual import *
@@ -64,6 +65,7 @@ tracker.log('DISPLAY COORDS %d %d %d %d' % (0, 0, DISPSIZE[0]-1, DISPSIZE[1]-1))
 tracker.log('FRAMERATE %d' % (fr))
 tracker.send_command("calibration_type= %s" % caltype) 											
 tracker.calibrate()
+#pylink.getEYELINK().doTrackerSetup(width=1920, height=1080)
 	
 #-------------------------
 # Experimental trials:
@@ -94,45 +96,47 @@ for i in range(0, len(design)): # for each of the trials
 		cond= 3 # deviant
 	
 	# position of sound (only applicable to deviant sounds)
-	soundPos= design[1][2]	
+	soundPos= design[i][2]
+	#print(cond)	
+	#print(soundPos)
 	
 	#cond= condition[i]
 	sentenceString= corpus[design[i][0]-1]
 	
-	if cond==2 or cond==3:
+	if cond<9: # if not practice
 	
 		# get word boundaries:
 		Bnds= getBnds(sentenceString, sentPos, Pix_per_Letter)
-	
-		boundary1= Bnds[2]
-		boundary2= Bnds[4]
-		boundary3= Bnds[6]
-		boundary4= Bnds[8]
-		boundary5= Bnds[10]
-	
+		
+		boundary1= Bnds[1]
+		boundary2= Bnds[3]
+		boundary3= Bnds[5]
+		boundary4= Bnds[7]
+		boundary5= Bnds[9]
+		
 		boundary1Crossed= False
 		boundary2Crossed= False
 		boundary3Crossed= False
 		boundary4Crossed= False
 		boundary5Crossed= False
-		
+			
 		# time sound was played
 		tPlay1= 0
 		tPlay2= 0
 		tPlay3= 0
 		tPlay4= 0
 		#tPlay5= 0	
-		
+			
 		# time elapsed since sound was played
 		tSound1= 0
 		tSound2= 0
 		tSound3= 0
 		tSound4= 0
 		#tSound5= 0
-	
-	# if number of sounds to be played is not known in advance, take max boundaries for longest sentence.
-	# Then, here, say: if boundary n doesn't exists: Boundary n crossed== True (i.e. nothing happens during trial)
-	
+		
+		# if number of sounds to be played is not known in advance, take max boundaries for longest sentence.
+		# Then, here, say: if boundary n doesn't exists: Boundary n crossed== True (i.e. nothing happens during trial)
+		
       # get sounds:
 	if cond==2:
 		sound1= Sound('standard.wav')
@@ -144,29 +148,34 @@ for i in range(0, len(design)): # for each of the trials
 		sound_type= ["STD", "STD", "STD", "STD", "STD"]
 	
 	if cond==3:
+		#print("if cond")
 		# SOUND 1
 		sound1= Sound('standard.wav') # 1st sound is always standard
 		
 		# SOUND 2
 		if soundPos==2:
+			print("pos2")
 			sound2= Sound('deviant.wav')
 		else:
 			sound2= Sound('standard.wav')
 		
 		# SOUND 3
 		if soundPos==3:
+			print("pos3")
 			sound3= Sound('deviant.wav')
 		else:
 			sound3= Sound('standard.wav')
 		
 		# SOUND 4
 		if soundPos==4:
+			print("pos4")
 			sound4= Sound('deviant.wav')
 		else:
 			sound4= Sound('standard.wav')
 			
 		# SOUND 5
 		if soundPos==5:
+			print("pos5")
 			sound5= Sound('deviant.wav')
 		else:
 			sound5= Sound('standard.wav')
@@ -192,12 +201,12 @@ for i in range(0, len(design)): # for each of the trials
 		
 		# print boundary location:
 		#tracker.log('BOUNDARY@ %d' % (boundary))
-		if cond==2 or cond==3:
-			tracker.log('CRITICAL REGION 1 @ %d %d' % (Bnds[0], Bnds[0+1]-Pix_per_Letter))
-			tracker.log('CRITICAL REGION 2 @ %d %d' % (Bnds[2], Bnds[2+1]-Pix_per_Letter))
-			tracker.log('CRITICAL REGION 3 @ %d %d' % (Bnds[4], Bnds[4+1]-Pix_per_Letter))
-			tracker.log('CRITICAL REGION 4 @ %d %d' % (Bnds[6], Bnds[6+1]-Pix_per_Letter))
-			tracker.log('CRITICAL REGION 5 @ %d %d' % (Bnds[8], Bnds[8+1]-Pix_per_Letter))
+		if cond<9:
+			tracker.log('CRITICAL REGION 1 @ %d %d' % (Bnds[1], Bnds[1+1]-Pix_per_Letter))
+			tracker.log('CRITICAL REGION 2 @ %d %d' % (Bnds[3], Bnds[3+1]-Pix_per_Letter))
+			tracker.log('CRITICAL REGION 3 @ %d %d' % (Bnds[5], Bnds[5+1]-Pix_per_Letter))
+			tracker.log('CRITICAL REGION 4 @ %d %d' % (Bnds[7], Bnds[7+1]-Pix_per_Letter))
+			tracker.log('CRITICAL REGION 5 @ %d %d' % (Bnds[9], Bnds[9+1]-Pix_per_Letter))
 
 		
 		# print text stimuli to edf:
@@ -238,10 +247,12 @@ for i in range(0, len(design)): # for each of the trials
 		
 		if cond==2 or cond==3:
 	        	# plot word boundary lines on the eyelink display monitor:
+											
 	        	for i in range(0, len(Bnds)):
-	        		x1= (Bnds[i], sentPos[1]+50)
-	        		x2= (Bnds[i], sentPos[1]-50)
-	        		tracker.send_command("draw_line %d %d %d %d %d" % (x1[0], x1[1], x2[0], x2[1], 4))  
+				if i==1 or i==3 or i==5 or i==7 or i==9:
+		        		x1= (Bnds[i], sentPos[1]+50)
+		        		x2= (Bnds[i], sentPos[1]-50)
+		        		tracker.send_command("draw_line %d %d %d %d %d" % (x1[0], x1[1], x2[0], x2[1], 4))  
 	  
             # drift check:
 		tracker.drift_correction()	
@@ -302,8 +313,10 @@ for i in range(0, len(design)): # for each of the trials
 	
 	while not trialEnd:
 		trialTime= globalClock.getTime()- trialStart
-		trialEnd= myMouse.getPressed()[0] # terminate trial when mouse is clicked (temporary)
-		
+		#trialEnd= myMouse.getPressed()[0] # terminate trial when mouse is clicked (temporary)
+		allowedResp= ['5']
+		pressed, time= pylink.getEYELINK().getLastButtonPress()
+		trialEnd= any(i in str(pressed) for i in allowedResp)
 		#===========================
 		xpos= tracker.sample()[0]
            
@@ -387,6 +400,27 @@ for i in range(0, len(design)): # for each of the trials
 		   			sound5.play()
 					tracker.log("PLAY SOUND " + sound_type[4])
 					tracker.log("SOUND_DELAYED 5")
+		if cond==1:
+			# SOUND 1:
+			if xpos> boundary1 and not boundary1Crossed:
+				tracker.log("BOUNDARY CROSSED 1")
+				boundary1Crossed= True
+			# SOUND 2:
+			if xpos> boundary2 and not boundary2Crossed:
+				tracker.log("BOUNDARY CROSSED 2")
+				boundary2Crossed= True
+			# SOUND 3:
+			if xpos> boundary3 and not boundary3Crossed:
+				tracker.log("BOUNDARY CROSSED 3")
+				boundary3Crossed= True
+			# SOUND 4:
+			if xpos> boundary4 and not boundary4Crossed:
+				tracker.log("BOUNDARY CROSSED 4")
+				boundary4Crossed= True
+			# SOUND 5:
+			if xpos> boundary5 and not boundary5Crossed:
+				tracker.log("BOUNDARY CROSSED 5")
+				boundary5Crossed= True
 
 
 		if trialTime> TrialTimeout: # end trial automatically if no response by participant
@@ -406,8 +440,8 @@ for i in range(0, len(design)): # for each of the trials
 	tracker.stop_recording()
 	
 	
-	#if hasQuest[design[i][0]-1]:
-	#	Quest(disp, scr, tracker, item, cond, quest[design[i][0]-1], int(ans[design[i][0]-1]))
+	if int(hasQuest[item-1])==1:
+		Quest(disp, scr, tracker, item, cond, quest[item-1], int(ans[item-1]))
 
 tracker.close()
 disp.close()
