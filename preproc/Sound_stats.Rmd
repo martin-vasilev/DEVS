@@ -54,7 +54,7 @@ Note that technology doesn't allow absolute time-locking to the onset of fixatio
 ```{r, echo= FALSE}
 hist(sound_check$delFix, xlab= "Time until SFIX flag (in ms)", main= "Sound implementation timing", family= "serif", col="lightgreen", freq=FALSE, breaks=20)
 abline(v = mean(sound_check$delFix, na.rm=T), col= "darkred", lwd=3)
-#curve(dnorm(x, mean=mean(sound_check$delFix, na.rm=T)), sd=sd(sound_check$delFix, na.rm=T), add=TRUE, col="darkblue", lwd=2) 
+curve(dnorm(x, mean=mean(sound_check$delFix, na.rm=T), sd=sd(sound_check$delFix, na.rm=T)), add=TRUE, col="darkblue", lwd=2) 
 
 ```
 
@@ -67,6 +67,6 @@ Mean: `r mean(sound_check$ISI, na.rm=T)`. SD: `r sd(sound_check$ISI, na.rm=T)`. 
 ```{r, echo= FALSE}
 hist(sound_check$ISI, xlab= "ISI between two consequitive sounds", main= "ISI timing", family= "serif", col="lightgreen", freq=FALSE, breaks=20)
 abline(v = mean(sound_check$ISI, na.rm=T), col= "darkred", lwd=3)
-#curve(dnorm(x, mean=mean(sound_check$ISI, na.rm=T)), sd=sd(sound_check$ISI, na.rm=T), add=TRUE, col="darkblue", lwd=2) 
+curve(dnorm(x, mean=mean(sound_check$ISI, na.rm=T), sd=sd(sound_check$ISI, na.rm=T)), add=TRUE, col="darkblue", lwd=2) 
 
 ```
