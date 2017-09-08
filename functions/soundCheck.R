@@ -220,15 +220,17 @@ soundCheck<- function(list_asc = "preproc/files.txt", maxtrial=120, nsounds=5, p
         nextESACC<- which(grepl('ESACC' , trialF[s:length(trialF)]))
         nextEFIX<- which(grepl('EFIX' , trialF[s:length(trialF)]))
         
-        if(nextESACC[1]<nextEFIX[1]){
-          type<- 'ESACC'
-          stamp<- nextESACC[1]
-        } else{
-          type<- 'EFIX'
-          stamp<- nextEFIX[1]
+        if(!is.na(nextESACC[1]) & !is.na(nextEFIX[1])){
+          if(nextESACC[1]<nextEFIX[1]){
+            type<- 'ESACC'
+            stamp<- nextESACC[1]
+          } else{
+            type<- 'EFIX'
+            stamp<- nextEFIX[1]
+          }
+          temp$nextFlag<- type
         }
-        temp$nextFlag<- type
-        
+
         
         ###
         # previous fixation not on empty space?
@@ -244,30 +246,37 @@ soundCheck<- function(list_asc = "preproc/files.txt", maxtrial=120, nsounds=5, p
         
         ####
         # Next fixation on critical word?
-        if(round(temp$nextFix)>= temp$regionS & round(temp$nextFix)<= temp$regionE){
-          temp$onTarget<- "Yes"
-        }else{
-          temp$onTarget<- "No"
+        if(!is.na(temp$nextFix)){
+          if(round(temp$nextFix)>= temp$regionS & round(temp$nextFix)<= temp$regionE){
+            temp$onTarget<- "Yes"
+          }else{
+            temp$onTarget<- "No"
+          }
         }
 
         
         ####
         # Next fixation in critical region?
-        if(round(temp$nextFix)< temp$regionN1 & round(temp$nextFix)>= temp$regionS-ppl){
-          # -ppl because fix is still in region if on the space before the critical word
-          temp$inRegion<- "Yes"
-        } else{
-          temp$inRegion<- "No"
+        if(!is.na(temp$nextFix)){
+          if(round(temp$nextFix)< temp$regionN1 & round(temp$nextFix)>= temp$regionS-ppl){
+            # -ppl because fix is still in region if on the space before the critical word
+            temp$inRegion<- "Yes"
+          } else{
+            temp$inRegion<- "No"
+          }
         }
+
         
         ###
         # Hook- boundary crossing?
-        
-        if(round(temp$nextFix)<= temp$regionS){
-          temp$hook<- "Yes"
-        }else{
-          temp$hook<- "No"
+        if(!is.na(temp$nextFix)){
+          if(round(temp$nextFix)<= temp$regionS){
+            temp$hook<- "Yes"
+          }else{
+            temp$hook<- "No"
+          }
         }
+
         
         ######
         # Target word blink?

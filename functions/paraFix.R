@@ -1,7 +1,7 @@
 
 # Martin R. Vasilev, 2017
 
-paraFix<- function(data_list= "preproc/files.txt", ResX= 1920, ResY=1080, maxtrial= 120, plot=TRUE){
+paraFix<- function(data_list= "preproc/files.txt", ResX= 1920, ResY=1080, maxtrial= 120, plot=TRUE, keepLastFix=TRUE){
   
   # Load functions:
   source("functions/utility.R")
@@ -26,7 +26,7 @@ paraFix<- function(data_list= "preproc/files.txt", ResX= 1920, ResY=1080, maxtri
       text<- get_text(file[trial_db$ID[j]:trial_db$start[j]])
       coords<- get_coord(text)
       map<- coord_map(coords, x=ResX, y= ResY)
-      raw_fix_temp<- parse_fix(file, map, coords, trial_db[j,], i, ResX, ResY)
+      raw_fix_temp<- parse_fix(file, map, coords, trial_db[j,], i, ResX, ResY, keepLastFix)
       
       
       raw_fix<- rbind(raw_fix, raw_fix_temp) # plot it

@@ -276,7 +276,7 @@ trial_info<- function(file, maxtrial, data){ # extracts information for processi
 
 
 # Basic pre-processing and extraction of fixations from data file:
-parse_fix<- function(file, map, coords, trial_db, i, ResX, ResY){
+parse_fix<- function(file, map, coords, trial_db, i, ResX, ResY, keepLastFix){
   
   get_FIX_stamp<- function(string){as.numeric(substr(string, 1, unlist(gregexpr(pattern ='\t', string))[1]-1))}
   
@@ -284,19 +284,23 @@ parse_fix<- function(file, map, coords, trial_db, i, ResX, ResY){
   # +1 because it affects the next fixation
   
   get_x_pixel<- function(string){
-    tab_loc<- unlist(gregexpr(pattern ='\t', string))[3:4]
-    sub_str<- substr(string, tab_loc[1], tab_loc[2])
-    x<- as.numeric(unlist(gsub("[^0-9.]", "", unlist(sub_str)), ""))
-    x<- floor(x)
+    #tab_loc<- unlist(gregexpr(pattern ='\t', string))[3:4]
+    #sub_str<- substr(string, tab_loc[1], tab_loc[2])
+    #x<- as.numeric(unlist(gsub("[^0-9.]", "", unlist(sub_str)), ""))
+    #x<- floor(x)
+    a<- data.frame(do.call( rbind, strsplit( string, '\t' ) ) )
+    x<- as.numeric(as.character(unlist(a$X4)))
     
     return(x)
   }
   
   get_y_pixel<- function(string){
-    tab_loc<- unlist(gregexpr(pattern ='\t', string))[4:5]
-    sub_str<- substr(string, tab_loc[1], tab_loc[2])
-    y<- as.numeric(unlist(gsub("[^0-9.]", "", unlist(sub_str)), ""))
-    y<- floor(y)
+    #tab_loc<- unlist(gregexpr(pattern ='\t', string))[4:5]
+    #sub_str<- substr(string, tab_loc[1], tab_loc[2])
+    #y<- as.numeric(unlist(gsub("[^0-9.]", "", unlist(sub_str)), ""))
+    #y<- floor(y)
+    a<- data.frame(do.call( rbind, strsplit( string, '\t' ) ) )
+    y<- as.numeric(as.character(unlist(a$X5)))
     
     return(y)
   }
@@ -458,9 +462,11 @@ parse_fix<- function(file, map, coords, trial_db, i, ResX, ResY){
   raw_fix<- data.frame(sub,item, cond, seq, s_time, e_time,xPos, yPos, fix_num, fix_dur,
                        sent, max_sent, line, word, max_word, char_sent, intrasent_regr, intersent_regr, blink,
                        outOfBnds, outsideText)
-  # remove last fixation on trial (due to participants' making a decision to press the button)
-  raw_fix<- raw_fix[-nrow(raw_fix),]
-  
+  if(keepLastFix==FALSE){
+    # remove last fixation on trial (due to participants' making a decision to press the button)
+    raw_fix<- raw_fix[-nrow(raw_fix),]
+  }
+
   #raw_fix<- rbind(raw_fix, temp)
   
   #rm(item, cond, seq, s_time, e_time,xPos, yPos, fix_num, fix_dur,
@@ -469,4 +475,84 @@ parse_fix<- function(file, map, coords, trial_db, i, ResX, ResY){
   # } # end of i loop
   
   return(raw_fix)
+}
+
+
+reAlign<- function(rawfix, coords, map){
+  
+  old<- rawfix
+  
+  #---------------------------------------
+  # get some info about position of text:
+  #---------------------------------------
+  
+  ystart<- coords$y1[1] # start of first line on y-axis
+  yend<- coords$y2[nrow(coords)] # end of last line on y-axis
+  nlines<- max(coords$line) # number of lines in trial
+  
+  # x start position of each line
+  xstart<- matrix(nrow = nlines, ncol = 2, data = 0)
+  xstart[1:nlines,1]<- 1:nlines
+  
+  # x end position of each line
+  xend<- matrix(nrow = nlines, ncol = 2, data = 0)
+  xend[1:nlines,1]<- 1:nlines
+  
+  for(i in 1:nlines){
+    a<- subset(coords, line==i)
+    xstart[i,2]<- a$x1[1]
+    xend[i,2]<- a$x2[nrow(a)]
+  }
+  
+  
+  #----------------------------------------------------
+  #     Re-alignment of fixations outside the text box:
+  #----------------------------------------------------
+  
+  rawfix$reAligned<- "No"
+  rawfix$prevX<- NA
+  rawfix$prevY<- NA
+  
+  for(i in 1:nrow(rawfix)){
+    if(is.na(rawfix$sent[i])){ # if fixation needs to be re-aligned
+      
+      #------------#
+      # Problem 1: # Fixation is above the first line of text
+      #------------#
+      #-->  Solution: Bring it down to first line of text (y pos)
+      
+      if(rawfix$yPos[i]<ystart){
+        
+        rawfix$prevX[i]<- rawfix$xPos[i]
+        rawfix$prevY[i]<- rawfix$yPos[i]
+        rawfix$reAligned[i]<- "Yes"
+        rawfix$yPos[i]<- ystart+1
+        
+        # Fill in missing info:
+        loc<- map[rawfix$yPos[i], rawfix$xPos[i]]
+        rawfix$sent[i]<- coords$sent[loc]
+        rawfix$word[i]<- coords$word[loc]
+        rawfix$line[i]<- coords$line[loc]
+        if(i==1){
+          rawfix$max_word[i]<- rawfix$word[i]
+          rawfix$max_sent[i]<- rawfix$sent[i]
+        } else{
+          if(rawfix$max_sent[i-1]< rawfix$sent[i]){
+            rawfix$max_sent[i]<- rawfix$sent[i]
+          } else{
+            rawfix$max_sent[i]<- rawfix$max_sent[i-1]
+          }
+          
+          if(rawfix$max_word[i-1]< rawfix$word[i]){
+            rawfix$max_word[i]<- rawfix$word[i]
+          } else{
+            rawfix$max_word[i]<- rawfix$max_word[i-1]
+          }
+        }
+        
+      } # end of Problem 1
+    }
+  }
+  
+  
 }

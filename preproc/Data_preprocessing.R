@@ -48,13 +48,20 @@ sound_check<- subset(sound_check, delFix<80)
 source("functions/paraFix.R")
 source("functions/assign_cond.R")
 
-raw_fix<- paraFix(plot=T)
+raw_fix<- paraFix(plot=F)
 
 raw_fix<- assign_cond(sound_check, raw_fix)
 
+raw_fix<- subset(raw_fix, out==0 & blink==0)
 #110
 
 save(raw_fix, file= "data/raw_fix.Rda")
 
+source("functions/reading_times.R")
+
+FD<- reading_measures(raw_fix)
 
 
+# CHECK BLINKS more carefully: e.g. E2I3D0
+
+# REMOVE OUTLIERS; perhaps even at raw_fix
