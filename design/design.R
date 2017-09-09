@@ -13,6 +13,8 @@ for(i in 1:48){
   design<- rbind(design, t)
 }
 
+design<- subset(design, item<121) # remove practice items
+
 table(design$item, design$sound)
 table(design$item, design$pos)
 table(design$sound, design$pos)

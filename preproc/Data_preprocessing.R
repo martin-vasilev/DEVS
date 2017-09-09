@@ -55,13 +55,23 @@ raw_fix<- assign_cond(sound_check, raw_fix)
 raw_fix<- subset(raw_fix, out==0 & blink==0)
 #110
 
+
+# Merge any fixations <80ms within a character:
+source("functions/less80.R")
+raw_fix<- less80(raw_fix)
+l80<- which(raw_fix$fix_dur<80)
+raw_fix<- raw_fix[-l80,]
 save(raw_fix, file= "data/raw_fix.Rda")
 
-source("functions/reading_times.R")
 
+source("functions/reading_times.R")
 FD<- reading_measures(raw_fix)
 
+out<- which(FD$FFD>800 | FD$GD>2000 | FD$TVT>3000)
 
-# CHECK BLINKS more carefully: e.g. E2I3D0
+if(length(out)>0){
+  FD<- FD[out,]
+}
 
-# REMOVE OUTLIERS; perhaps even at raw_fix
+save(FD, file='data/FD.Rda')
+
