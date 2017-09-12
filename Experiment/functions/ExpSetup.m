@@ -4,6 +4,9 @@ global Visual const Monitor el Audio;
 % get participant number:
 const.ID= input('Please enter participant number: ');
 const.edffilename= [const.expName '' num2str(const.ID) '' '.edf'];
+if exist(const.edffilename, 'file')==2 %check if file already exists
+    error('Participant file already exists!');
+end
 
 %% Open screen
 oldVisualDebugLevel = Screen('Preference', 'VisualDebugLevel', 3);
@@ -29,6 +32,8 @@ end
 %% Open Eyelink connection:
 dummymode=0;
 el=EyelinkInitDefaults(Monitor.window);
+
+%el.cal_target_beep=[1250 0 0.05];
 
 % Initialization of the connection with the Eyelink Gazetracker.
 % exit program if this fails.

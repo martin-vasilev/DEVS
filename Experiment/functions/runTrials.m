@@ -76,149 +76,52 @@ for i=1:const.ntrials
     
     % get sounds:
     if cond==2
-        % 		sound1file= [cd '\corpus\' 'standard.wav'];
-% 		sound2file= [cd '\corpus\' 'standard.wav'];
-% 		sound3file= [cd '\corpus\' 'standard.wav'];
-% 		sound4file= [cd '\corpus\' 'standard.wav'];
-% 		sound5file= [cd '\corpus\' 'standard.wav'];
 		
 		sound_type= {'STD', 'STD', 'STD', 'STD', 'STD'};
         
-        %% load up sounds:
-    
-        % Sound 1:
-%         [y, freq] = wavread(sound1file);
-%         wavedata = y';
-%         nrchannels = size(wavedata,1); % Number of rows == number of channels.
-%         InitializePsychSound;
-%         sound1 = PsychPortAudio('Open', [], [], 0, freq, nrchannels);
-%         PsychPortAudio('FillBuffer', sound1, wavedata);
-%         %t1 = PsychPortAudio('Start', sound1, repetitons, 0, 1);
         sound1 = Audio.standard;
-        
-        % Sound 2:
-%         [y, freq] = wavread(sound2file);
-%         wavedata = y';
-%         nrchannels = size(wavedata,1); % Number of rows == number of channels.
-%         InitializePsychSound;
-%         sound2 = PsychPortAudio('Open', [], [], 0, freq, nrchannels);
-%         PsychPortAudio('FillBuffer', sound2, wavedata);
         sound2 = Audio.standard;
-        
-        % Sound 3:
-%         [y, freq] = wavread(sound3file);
-%         wavedata = y';
-%         nrchannels = size(wavedata,1); % Number of rows == number of channels.
-%         InitializePsychSound;
-%         sound3 = PsychPortAudio('Open', [], [], 0, freq, nrchannels);
-%         PsychPortAudio('FillBuffer', sound3, wavedata);
         sound3 = Audio.standard;
-        
-        % Sound 4:
-%         [y, freq] = wavread(sound4file);
-%         wavedata = y';
-%         nrchannels = size(wavedata,1); % Number of rows == number of channels.
-%         InitializePsychSound;
-%         sound4 = PsychPortAudio('Open', [], [], 0, freq, nrchannels);
-%         PsychPortAudio('FillBuffer', sound4, wavedata);
         sound4 = Audio.standard;
-        
-        % Sound 5:
-%         [y, freq] = wavread(sound5file);
-%         wavedata = y';
-%         nrchannels = size(wavedata,1); % Number of rows == number of channels.
-%         InitializePsychSound;
-%         sound5 = PsychPortAudio('Open', [], [], 0, freq, nrchannels);
-%         PsychPortAudio('FillBuffer', sound5, wavedata);
         sound5 = Audio.standard;
     end
     
     
     if cond==3
-        		% SOUND 1
-		%sound1file= [cd '\corpus\' 'standard.wav']; % 1st sound is always standard
-        sound1= Audio.standard;
+        % SOUND 1
+        sound1= Audio.standard;  % 1st sound is always standard
 		
 		% SOUND 2
         if soundPos==2
-            %sound2file= [cd '\corpus\' 'deviant.wav'];
             sound2= Audio.deviant;
         else
-            %sound2file= [cd '\corpus\' 'standard.wav'];
             sound2= Audio.standard;
         end
         
 		% SOUND 3
 		if soundPos==3
             sound3= Audio.deviant;
-			%sound3file= [cd '\corpus\' 'deviant.wav'];
         else
             sound3= Audio.standard;
-			%sound3file= [cd '\corpus\' 'standard.wav'];
         end
         
 		% SOUND 4
 		if soundPos==4
             sound4= Audio.deviant;
-			%sound4file= [cd '\corpus\' 'deviant.wav'];
         else
             sound4= Audio.standard;
-			%sound4file= [cd '\corpus\' 'standard.wav'];
         end
         
 		% SOUND 5
 		if soundPos==5
             sound5= Audio.deviant;
-			%sound5file= [cd '\corpus\' 'deviant.wav'];
         else
             sound5= Audio.standard;
-			%sound5file= [cd '\corpus\' 'standard.wav'];
         end
         
 		sound_type= {'STD', 'STD', 'STD', 'STD', 'STD'};
 		sound_type{soundPos}= 'DEV'; % replace only 1 deviant
-	    %% load up sounds:
     
-%         % Sound 1:
-%         [y, freq] = wavread(sound1file);
-%         wavedata = y';
-%         nrchannels = size(wavedata,1); % Number of rows == number of channels.
-%         InitializePsychSound;
-%         sound1 = PsychPortAudio('Open', [], [], 0, freq, nrchannels);
-%         PsychPortAudio('FillBuffer', sound1, wavedata);
-%         
-%         % Sound 2:
-%         [y, freq] = wavread(sound2file);
-%         wavedata = y';
-%         nrchannels = size(wavedata,1); % Number of rows == number of channels.
-%         InitializePsychSound;
-%         sound2 = PsychPortAudio('Open', [], [], 0, freq, nrchannels);
-%         PsychPortAudio('FillBuffer', sound2, wavedata);
-%         
-%         % Sound 3:
-%         [y, freq] = wavread(sound3file);
-%         wavedata = y';
-%         nrchannels = size(wavedata,1); % Number of rows == number of channels.
-%         InitializePsychSound;
-%         sound3 = PsychPortAudio('Open', [], [], 0, freq, nrchannels);
-%         PsychPortAudio('FillBuffer', sound3, wavedata);
-%         
-%         % Sound 4:
-%         [y, freq] = wavread(sound4file);
-%         wavedata = y';
-%         nrchannels = size(wavedata,1); % Number of rows == number of channels.
-%         InitializePsychSound;
-%         sound4 = PsychPortAudio('Open', [], [], 0, freq, nrchannels);
-%         PsychPortAudio('FillBuffer', sound4, wavedata);
-%         
-%         % Sound 5:
-%         [y, freq] = wavread(sound5file);
-%         wavedata = y';
-%         nrchannels = size(wavedata,1); % Number of rows == number of channels.
-%         InitializePsychSound;
-%         sound5 = PsychPortAudio('Open', [], [], 0, freq, nrchannels);
-%         PsychPortAudio('FillBuffer', sound5, wavedata);
-
     end
     
     % drift check:
@@ -362,6 +265,10 @@ for i=1:const.ntrials
 	trialStart= GetSecs;
     
     %% Gaze contingent part:
+    % I'm using MaxCross to limit the impact of blinks and track loses.
+    % Sometimes, xpos will be > max Screen size right after the blink. 
+    % This will by default trigger all boundaries that haven't been
+    % crossed so far. Adding this condition limits this (sometimes). 
     
     while ~trialEnd
         trialTime= GetSecs- trialStart;
