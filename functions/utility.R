@@ -369,7 +369,7 @@ parse_fix<- function(file, map, coords, trial_db, i, ResX, ResY, keepLastFix){
   loc<- NULL; raw_fix<- NULL; temp<- NULL; sub<- NULL
   s_time<- NULL; e_time<- NULL; xPos<- NULL; yPos<- NULL
   item<- NULL; cond<- NULL; seq<- NULL; fix_num<- NULL; fix_dur<- NULL
-  sent<- NULL; line<- NULL; word<- NULL; char_sent<- NULL
+  sent<- NULL; line<- NULL; word<- NULL; char_trial<- NULL
   max_sent<- NULL; max_word<- NULL; intersent_regr<- NULL
   intrasent_regr<- NULL; blink<- NULL; outOfBnds<- NULL; outsideText<- NULL
   
@@ -381,11 +381,6 @@ parse_fix<- function(file, map, coords, trial_db, i, ResX, ResY, keepLastFix){
     
     loc<- map[fix$y[j], fix$x[j]] # locate fixation
     
-    if(length(loc)==0){
-      outsideText[j]<- 1
-    } else{
-      outsideText[j]<- 0
-    }
     
     # general info:
     sub[j]<- i
@@ -405,6 +400,13 @@ parse_fix<- function(file, map, coords, trial_db, i, ResX, ResY, keepLastFix){
       outOfBnds[j]<- 1
     } else{
       outOfBnds[j]<- 0
+      
+      # outside of text area?
+      if(is.na(loc)){
+        outsideText[j]<- 1
+      } else{
+        outsideText[j]<- 0
+      }
     }
     
     # stimuli info:
@@ -412,10 +414,10 @@ parse_fix<- function(file, map, coords, trial_db, i, ResX, ResY, keepLastFix){
       sent[j]<- coords$sent[loc]
       line[j]<- coords$line[loc]
       word[j]<- coords$word[loc]
-      char_sent[j]<- as.numeric(as.character(levels(coords$char[loc])[coords$char[loc]]))+1
+      char_trial[j]<- as.numeric(as.character(levels(coords$char[loc])[coords$char[loc]]))+1
       # +1 bc Eyetrack counts from 0
     } else{
-      sent[j]<- NA; line[j]<- NA; word[j]<- NA; char_sent[j]<- NA
+      sent[j]<- NA; line[j]<- NA; word[j]<- NA; char_trial[j]<- NA
     }
     
     # saccade stuff:
@@ -460,7 +462,7 @@ parse_fix<- function(file, map, coords, trial_db, i, ResX, ResY, keepLastFix){
   } # end of j loop
   
   raw_fix<- data.frame(sub,item, cond, seq, s_time, e_time,xPos, yPos, fix_num, fix_dur,
-                       sent, max_sent, line, word, max_word, char_sent, intrasent_regr, intersent_regr, blink,
+                       sent, max_sent, line, word, max_word, char_trial, intrasent_regr, intersent_regr, blink,
                        outOfBnds, outsideText)
   if(keepLastFix==FALSE){
     # remove last fixation on trial (due to participants' making a decision to press the button)
@@ -470,7 +472,7 @@ parse_fix<- function(file, map, coords, trial_db, i, ResX, ResY, keepLastFix){
   #raw_fix<- rbind(raw_fix, temp)
   
   #rm(item, cond, seq, s_time, e_time,xPos, yPos, fix_num, fix_dur,
-  #   sent, max_sent, line, word, max_word, char_sent, intrasent_regr, intersent_regr, blink)
+  #   sent, max_sent, line, word, max_word, char_trial, intrasent_regr, intersent_regr, blink)
   
   # } # end of i loop
   
@@ -478,7 +480,7 @@ parse_fix<- function(file, map, coords, trial_db, i, ResX, ResY, keepLastFix){
 }
 
 
-reAlign<- function(rawfix, coords, map){
+reAlign<- function(rawfix, coords, map, ResX, ResY){
   
   old<- rawfix
   
@@ -512,23 +514,51 @@ reAlign<- function(rawfix, coords, map){
   rawfix$reAligned<- "No"
   rawfix$prevX<- NA
   rawfix$prevY<- NA
+  rawfix$reason<-NA
   
   for(i in 1:nrow(rawfix)){
+    
     if(is.na(rawfix$sent[i])){ # if fixation needs to be re-aligned
+      
+      fillIn<- FALSE
       
       #------------#
       # Problem 1: # Fixation is above the first line of text
       #------------#
-      #-->  Solution: Bring it down to first line of text (y pos)
+      #-->  Solution: Bring it down to the first line of text (y pos)
       
-      if(rawfix$yPos[i]<ystart){
+      if(rawfix$yPos[i]<ystart & rawfix$yPos[i]> 1){
         
         rawfix$prevX[i]<- rawfix$xPos[i]
         rawfix$prevY[i]<- rawfix$yPos[i]
         rawfix$reAligned[i]<- "Yes"
         rawfix$yPos[i]<- ystart+1
+        fillIn<- TRUE
+        rawfix$reason[i]<- 'P1'
+      } # end of Problem 1
         
-        # Fill in missing info:
+      
+      
+      #------------#
+      # Problem 2: # Fixation is below the last line of text
+      #------------#
+      #-->  Solution: Bring it up to the last line of text (y pos)
+      
+      if(rawfix$yPos[i]>yend & rawfix$yPos[i]< ResY){
+        rawfix$prevX[i]<- rawfix$xPos[i]
+        rawfix$prevY[i]<- rawfix$yPos[i]
+        rawfix$reAligned[i]<- "Yes"
+        rawfix$yPos[i]<- yend-1
+        fillIn<- TRUE
+        rawfix$reason[i]<- 'P2'
+      } # end of Problem 2
+      
+      
+      #-----------------------#
+      # Fill in missing info: #
+      #-----------------------#
+      
+      if(fillIn){
         loc<- map[rawfix$yPos[i], rawfix$xPos[i]]
         rawfix$sent[i]<- coords$sent[loc]
         rawfix$word[i]<- coords$word[loc]
@@ -543,16 +573,21 @@ reAlign<- function(rawfix, coords, map){
             rawfix$max_sent[i]<- rawfix$max_sent[i-1]
           }
           
-          if(rawfix$max_word[i-1]< rawfix$word[i]){
-            rawfix$max_word[i]<- rawfix$word[i]
-          } else{
-            rawfix$max_word[i]<- rawfix$max_word[i-1]
+          if(!is.na(rawfix$max_word[i-1])){
+            if(rawfix$max_word[i-1]< rawfix$word[i]){
+              rawfix$max_word[i]<- rawfix$word[i]
+            } else{
+              rawfix$max_word[i]<- rawfix$max_word[i-1]
+            }
           }
+
         }
-        
-      } # end of Problem 1
+      } # end of fill in
+
+      
     }
   }
   
+  return(rawfix)
   
 }

@@ -1,7 +1,7 @@
 ---
 title: "Sound stats"
 author: "Martin R Vasilev"
-date: "14 August 2017"
+date: "14 September 2017"
 output:
   pdf_document: default
   html_document: default
@@ -16,7 +16,7 @@ knitr::opts_knit$set(root.dir = 'C:/Users/mvasilev/Documents/DEVS')
 ## Data pre-processing:
 
 ```{r, echo= FALSE}
-
+source("https://raw.githubusercontent.com/martin-vasilev/R_scripts/master/useful_functions.R")
 load("preproc/sound_check.Rda")
 
 nobs<- nrow(sound_check)
@@ -70,3 +70,66 @@ abline(v = mean(sound_check$ISI-50, na.rm=T), col= "darkred", lwd=3)
 curve(dnorm(x, mean=mean(sound_check$ISI-50, na.rm=T), sd=sd(sound_check$ISI-50, na.rm=T)), add=TRUE, col="darkblue", lwd=2) 
 
 ```
+
+
+### Descriptive statistics:
+
+#### Fixation duration measures (on critical words):
+
+```{r, echo=FALSE}
+load('data/FD.Rda')
+
+load_package('reshape')
+FD<- subset(FD,!is.na(sound))
+FD$sound<- as.factor(FD$sound)
+
+DesFix<- melt(FD, id=c('sub', 'item', 'cond', 'sound'), 
+              measure=c("FFD", "GD", "TVT"), na.rm=TRUE)
+mFix<- cast(DesFix, sound ~ variable
+            , function(x) c(M=signif(mean(x),3)
+                            , SD= sd(x) ))
+
+
+load_package("ggplot2")
+
+db<- data.frame(c(mFix$FFD_M, mFix$GD_M, mFix$TVT_M), c(mFix$FFD_SD, mFix$GD_SD, mFix$TVT_SD),
+                c(rep("FFD",3),  rep("GD",3), rep("TVT",3)), 
+                rep(c("Standard", "Deviant", "Silence"),3))
+
+colnames(db)<- c("Mean", "SD", "Measure", "Sound")
+db$SE<- db$SD/sqrt(length(unique(FD$sub)))
+
+db$Sound<- factor(db$Sound, levels= c("Silence", "Standard", "Deviant"))
+
+limits <- aes(ymax = db$Mean + db$SE, ymin=db$Mean - db$SE)
+
+Dplot<- ggplot(data= db, aes(x=Sound, y= Mean, color=Measure, fill= Measure, group= Measure, shape= Measure, linetype= Measure))+ 
+  scale_fill_brewer(palette="Dark2")+ 
+  scale_colour_brewer(palette="Dark2")+
+  #scale_fill_manual(values=c(ColorBlind[6:7]))+
+  #scale_colour_manual(values=c(ColorBlind[6:7]))+
+  theme_bw() + theme(panel.grid.major = element_line(colour = "#E3E5E6", size=0.7), 
+                     axis.line = element_line(colour = "black", size=1),
+                     panel.border = element_rect(colour = "black", size=1, fill = NA))+
+  geom_line(size=2)+
+  geom_point(size=7)+ 
+  xlab("\n Background sound")+ ylab("Mean fixation duration (in ms)")+ 
+  theme(legend.position= c(.11, .85), legend.title=element_text(size=20,
+        face="bold", family="serif"),
+        legend.text=element_text(size=20,family="serif"),legend.key.width=unit(2,"cm"),
+        legend.key.height=unit(1,"cm"), strip.text=element_text(size=20, family="serif"),
+        title=element_text(size=20, family="serif"),
+        axis.title.x = element_text(size=20, face="bold", family="serif"),
+        axis.title.y = element_text(size=20, face="bold", family="serif"), 
+        axis.text=element_text(size=20, family="serif"), 
+        panel.border = element_rect(linetype = "solid", colour = "black"), 
+        legend.key = element_rect(colour = "#000000", size=1))+
+  geom_ribbon(limits, alpha=0.1, colour=NA)
+
+```
+
+```{r, echo=FALSE, fig.height= 7, fig.width=9}
+Dplot
+
+```
+FFD: First fixation duration. GD: gaze duration (the sum of all fixations before moving on to another word). TVT: Total viewing time (the sum of all fixations, including the ones made during a regression).

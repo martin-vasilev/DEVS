@@ -48,7 +48,7 @@ sound_check<- subset(sound_check, delFix<80)
 source("functions/paraFix.R")
 source("functions/assign_cond.R")
 
-raw_fix<- paraFix(plot=F)
+raw_fix<- paraFix(plot=F, align = F)
 
 raw_fix<- assign_cond(sound_check, raw_fix)
 
@@ -70,7 +70,7 @@ FD<- reading_measures(raw_fix)
 out<- which(FD$FFD>800 | FD$GD>2000 | FD$TVT>3000)
 
 if(length(out)>0){
-  FD<- FD[out,]
+  FD<- FD[-out,]
 }
 
 save(FD, file='data/FD.Rda')

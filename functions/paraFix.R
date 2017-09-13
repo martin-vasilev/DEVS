@@ -1,15 +1,15 @@
 
 # Martin R. Vasilev, 2017
 
-paraFix<- function(data_list= "preproc/files.txt", ResX= 1920, ResY=1080, maxtrial= 120, plot=TRUE, keepLastFix=TRUE){
+paraFix<- function(data_list= "preproc/files.txt", ResX= 1920, ResY=1080, maxtrial= 120, align=TRUE, plot=TRUE, keepLastFix=TRUE){
   
   # Load functions:
   source("functions/utility.R")
   source("functions/plot_fix.R")
   
-  data<- readLines(data_list)
+  data<- readLines(data_list, warn=F)
 
-  raw_fix<- NULL
+  raw_fix<- NULL; RFalign<- NULL
   
   for (i in 1:length(data)){ # for each subject..
     #  i=1; # temporary
@@ -28,6 +28,12 @@ paraFix<- function(data_list= "preproc/files.txt", ResX= 1920, ResY=1080, maxtri
       map<- coord_map(coords, x=ResX, y= ResY)
       raw_fix_temp<- parse_fix(file, map, coords, trial_db[j,], i, ResX, ResY, keepLastFix)
       
+      # Align fixations:
+      if(align){
+        RFalignTemp<- reAlign(raw_fix_temp, coords, map, ResX, ResY)
+        RFalign<- rbind(RFalign, RFalignTemp)
+      }
+      
       
       raw_fix<- rbind(raw_fix, raw_fix_temp) # plot it
       
@@ -36,6 +42,9 @@ paraFix<- function(data_list= "preproc/files.txt", ResX= 1920, ResY=1080, maxtri
         # create picture of fixations:
         plot_fix(coords, raw_fix_temp, i, j, ResX, ResY)
       }
+      
+
+      
       cat(toString(j)); cat(" ")
     } # end of item loop
     
@@ -54,6 +63,11 @@ paraFix<- function(data_list= "preproc/files.txt", ResX= 1920, ResY=1080, maxtri
   #write.csv(raw_fix, file= "data/raw_fix.csv"); cat(".")
   cat("\n \n All Done!"); 
   
-  return(raw_fix)
+  if(align){
+    return(RFalign)
+  }else{
+    return(raw_fix)
+  }
+  
   
 }

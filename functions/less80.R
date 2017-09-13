@@ -24,10 +24,13 @@ less80<- function(data, ppl=14){
             p<- p[2]
           }
           if(length(p)>0){
-            n$fix_dur[p]<- n$fix_dur[p] + n$fix_dur[op[k]]
-            cat(sprintf("Subject %i trial %i: merged fixation %i into fixation %i", i, j, n$fix_num[op[k]], n$fix_num[p]))
-            cat(sprintf("\n\n"));
-            n$getOut[op[k]]<-1
+            if(n$intrasent_regr[p]==0){ # only if during first-pass reading
+              n$fix_dur[p]<- n$fix_dur[p] + n$fix_dur[op[k]]
+              cat(sprintf("Subject %i trial %i: merged fixation %i into fixation %i", i, j, n$fix_num[op[k]], n$fix_num[p]))
+              cat(sprintf("\n\n"));
+              n$getOut[op[k]]<-1
+            }
+
           }
         }
       }
