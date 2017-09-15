@@ -9,7 +9,7 @@ global Visual;
 pos= strfind(sentenceString, ' ');
 
 for i=1:length(pos)
-    Bnds(i)= Visual.sentPos(1)+ pos(i)*Visual.Pix_per_Letter;%+ Visual.Pix_per_Letter;
+    Bnds(i)= Visual.sentPos(1)+ pos(i)*Visual.Pix_per_Letter - Visual.Pix_per_Letter/2;%+ Visual.Pix_per_Letter;
 end
 
 end
