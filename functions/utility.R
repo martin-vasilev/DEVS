@@ -14,24 +14,31 @@ get_text<- function(file){ ## extracts the loaded text material                 
   start<- which(grepl("DISPLAY TEXT", file))+1 # start point
   end<- which(grepl("START", file))
   
-  text<- file[start:end] # subset file
-  a= which(gregexpr(pattern ='BUTTON', text)==1)
-  
-  if(length(a)>0){
-    text<- text[-a]
-    # text<- text[-a] # because one line is removed
+  if(length(start)==0){ # no start of text detected
+    return(0) # don't map fixations to stimuli
+    
+  } else{ # extract text containing stimuli info
+    text<- file[start:end] # subset file
+    a= which(gregexpr(pattern ='BUTTON', text)==1)
+    
+    if(length(a)>0){
+      text<- text[-a]
+      # text<- text[-a] # because one line is removed
+    }
+    
+    #input<- which(grepl("INPUT", text)); input<- input[1]-1 # end point
+    end2<- which(grepl("REGION", text))
+    end2<- end2[length(end2)]
+    
+    text<- text[1:end2]
+    
+    #end<- which(grepl("INPUT", file)); end<- end[1]-1 # end point
+    #text<- file[start:end] # subset file
+    return(text)
+    
   }
   
-  #input<- which(grepl("INPUT", text)); input<- input[1]-1 # end point
-  end2<- which(grepl("REGION", text))
-  end2<- end2[length(end2)]
-  
-  text<- text[1:end2]
-  
-  #end<- which(grepl("INPUT", file)); end<- end[1]-1 # end point
-  #text<- file[start:end] # subset file
-  return(text)
-}
+  }
 
 
 # Create a database with position of text on screen
@@ -276,7 +283,7 @@ trial_info<- function(file, maxtrial, data){ # extracts information for processi
 
 
 # Basic pre-processing and extraction of fixations from data file:
-parse_fix<- function(file, map, coords, trial_db, i, ResX, ResY, keepLastFix){
+parse_fix<- function(file, map, coords, trial_db, i, ResX, ResY, keepLastFix, hasText=TRUE){
   
   get_FIX_stamp<- function(string){as.numeric(substr(string, 1, unlist(gregexpr(pattern ='\t', string))[1]-1))}
   
@@ -373,14 +380,18 @@ parse_fix<- function(file, map, coords, trial_db, i, ResX, ResY, keepLastFix){
   max_sent<- NULL; max_word<- NULL; intersent_regr<- NULL
   intrasent_regr<- NULL; blink<- NULL; outOfBnds<- NULL; outsideText<- NULL
   
-  # max word for each sentence:
-  curr_sent<- matrix(0, max(coords$sent),2)
-  curr_sent[,1]<- c(1:max(coords$sent))
+  if(hasText){
+    # max word for each sentence:
+    curr_sent<- matrix(0, max(coords$sent),2)
+    curr_sent[,1]<- c(1:max(coords$sent))
+  }
+
   
   for(j in 1:nrow(fix)){
     
-    loc<- map[fix$y[j], fix$x[j]] # locate fixation
-    
+    if(hasText){
+      loc<- map[fix$y[j], fix$x[j]] # locate fixation
+    }
     
     # general info:
     sub[j]<- i
@@ -395,69 +406,81 @@ parse_fix<- function(file, map, coords, trial_db, i, ResX, ResY, keepLastFix){
     e_time[j]<- fix$e_time[j]
     xPos[j]<- fix$x[j];
     yPos[j]<- fix$y[j]
-    
-    if(xPos[j]<1 | xPos[j]> ResX | yPos[j]< 1 | yPos[j]>ResY){ # fixation is out of bounds
-      outOfBnds[j]<- 1
-    } else{
-      outOfBnds[j]<- 0
-      
-      # outside of text area?
-      if(is.na(loc)){
-        outsideText[j]<- 1
-      } else{
-        outsideText[j]<- 0
-      }
-    }
-    
-    # stimuli info:
-    if(!is.null(loc)){
-      sent[j]<- coords$sent[loc]
-      line[j]<- coords$line[loc]
-      word[j]<- coords$word[loc]
-      char_trial[j]<- as.numeric(as.character(levels(coords$char[loc])[coords$char[loc]]))+1
-      # +1 bc Eyetrack counts from 0
-    } else{
-      sent[j]<- NA; line[j]<- NA; word[j]<- NA; char_trial[j]<- NA
-    }
-    
-    # saccade stuff:
-    if(j==1){
-      max_sent[j]<- sent[j]
-    } else{
-      max_sent[j]<- max_sent[j-1]
-      
-      if(!is.na(max_sent[j])& !is.na(sent[j]) & sent[j]> max_sent[j]){
-        max_sent[j]<- sent[j]
-      }
-    }
-    
-    # maximum word:
-    if(j==1){
-      max_word[j]<- abs(word[j])
-      curr_sent[sent[j],2]<- abs(word[j])
-    } else{
-      max_word[j]<- curr_sent[sent[j],2]
-      if(!is.na(word[j])& abs(word[j])>curr_sent[sent[j],2]){
-        max_word[j]<- abs(word[j])
-        curr_sent[sent[j],2]<- abs(word[j]) # replace new max word
-      }
-    }
-    
-    # Regression stuff:
-    if(!is.na(max_sent[j])& !is.na(sent[j]) & sent[j]< max_sent[j]){
-      intersent_regr[j]<- 1
-    } else{
-      intersent_regr[j]<- 0
-    }
-    
-    # intra-sentence regressions:
-    if(!is.na(word[j])& abs(word[j])<max_word[j]){
-      intrasent_regr[j]<- 1
-    }else{
-      intrasent_regr[j]<- 0
-    }
-    
     blink[j]<- fix$blink[j]
+    
+    
+      if(xPos[j]<1 | xPos[j]> ResX | yPos[j]< 1 | yPos[j]>ResY){ # fixation is out of bounds
+        outOfBnds[j]<- 1
+      } else{
+        outOfBnds[j]<- 0
+        
+        if(hasText){
+          # outside of text area?
+          if(is.na(loc)){
+            outsideText[j]<- 1
+          } else{
+            outsideText[j]<- 0
+          }
+        }
+      }
+   
+    
+    if(hasText){   
+      # stimuli info:
+      if(!is.null(loc)){
+        sent[j]<- coords$sent[loc]
+        line[j]<- coords$line[loc]
+        word[j]<- coords$word[loc]
+        char_trial[j]<- as.numeric(as.character(levels(coords$char[loc])[coords$char[loc]]))+1
+        # +1 bc Eyetrack counts from 0
+      } else{
+        sent[j]<- NA; line[j]<- NA; word[j]<- NA; char_trial[j]<- NA
+      }
+      
+      # saccade stuff:
+      if(j==1){
+        max_sent[j]<- sent[j]
+      } else{
+        max_sent[j]<- max_sent[j-1]
+        
+        if(!is.na(max_sent[j])& !is.na(sent[j]) & sent[j]> max_sent[j]){
+          max_sent[j]<- sent[j]
+        }
+      }
+      
+      # maximum word:
+      if(j==1){
+        max_word[j]<- abs(word[j])
+        curr_sent[sent[j],2]<- abs(word[j])
+      } else{
+        max_word[j]<- curr_sent[sent[j],2]
+        if(!is.na(word[j])& abs(word[j])>curr_sent[sent[j],2]){
+          max_word[j]<- abs(word[j])
+          curr_sent[sent[j],2]<- abs(word[j]) # replace new max word
+        }
+      }
+      
+      # Regression stuff:
+      if(!is.na(max_sent[j])& !is.na(sent[j]) & sent[j]< max_sent[j]){
+        intersent_regr[j]<- 1
+      } else{
+        intersent_regr[j]<- 0
+      }
+      
+      # intra-sentence regressions:
+      if(!is.na(word[j])& abs(word[j])<max_word[j]){
+        intrasent_regr[j]<- 1
+      }else{
+        intrasent_regr[j]<- 0
+      }
+      
+    } else{ # end of if hasText
+      sent[j]=NA; max_sent[j]=NA; line[j]=NA; word[j]=NA; max_word[j]=NA;
+      char_trial[j]=NA; intrasent_regr[j]=NA; intersent_regr[j]=NA; outsideText[j]=NA
+    } 
+    
+    
+   
     
   } # end of j loop
   
@@ -468,21 +491,273 @@ parse_fix<- function(file, map, coords, trial_db, i, ResX, ResY, keepLastFix){
     # remove last fixation on trial (due to participants' making a decision to press the button)
     raw_fix<- raw_fix[-nrow(raw_fix),]
   }
+  
+  if(hasText==TRUE){
+    raw_fix$hasText<-1
+  }else{
+    raw_fix$hasText<-0
+  }
 
-  #raw_fix<- rbind(raw_fix, temp)
-  
-  #rm(item, cond, seq, s_time, e_time,xPos, yPos, fix_num, fix_dur,
-  #   sent, max_sent, line, word, max_word, char_trial, intrasent_regr, intersent_regr, blink)
-  
-  # } # end of i loop
   
   return(raw_fix)
 }
 
 
+#############
+# PLOTFIX.R #
+#############
+
+plot_fix<- function(coords, raw_fix_temp, i, j, ResX, ResY, hasText=TRUE){
+  
+  remap_letters<- function(letter, y){ # adjusted y position for easier reading
+    letter<- as.character(letter)
+    ascenders<- c("b", "d", "f", "h", "i", "k", "l", "t")
+    descenders<- c("g", "j", "p", "q", "y")
+    punct<- c(",", ".")
+    caps<- which(grepl("[A-Z]",letter))
+    
+    which_asc<- which(is.element(letter, ascenders))
+    which_desc<- which(is.element(letter, descenders))
+    which_punct<- which(is.element(letter, punct))
+    
+    y[which_desc]<- y[which_desc]- 2
+    y[which_asc]<- y[which_asc]+1
+    y[which_punct]<- y[which_punct]-4
+    y[caps]<- y[caps]+1
+    return(y)
+  }
+  
+  add.alpha <- function(col, alpha=1){
+    if(missing(col))
+      stop("Please provide a vector of colours.")
+    apply(sapply(col, col2rgb)/255, 2, 
+          function(x) 
+            rgb(x[1], x[2], x[3], alpha=alpha))  
+  }
+  
+  # create new directory for images:
+  mainDir <- getwd()
+  imgDir <- "img"
+  subDir<- paste("s", i, sep= "")
+  
+  if (!file.exists(imgDir)){
+    dir.create(file.path(mainDir, imgDir), showWarnings = FALSE)
+  }
+  
+  if (!file.exists(paste(imgDir, "/", subDir, sep=""))){
+    dir.create(file.path(imgDir, subDir), showWarnings = FALSE)
+  } 
+  
+  # create output string
+  output= paste(imgDir, "/", subDir, "/", "Sub_", i, "_", "item_", j, ".png", sep="") 
+  
+  
+  # open file for plotting:
+  png(filename = output, width = ResX, height = ResY, 
+      units = "px", pointsize = 12, bg="white", res = 100)          
+  par(mar=c(0,0,0,0)) # set plot margins to 0
+  
+  
+  # create empty plot:
+  plot(NA, axes=F, main="", xlab="" ,ylab="", col="black", ylim=c(0, ResY), xlim=c(0, ResX), xaxs="i", yaxs="i")
+  
+  if(hasText){
+    # convert coordinates to numbers:
+    coords$y1<- as.numeric(as.character(coords$y1))
+    coords$y2<- as.numeric(as.character(coords$y2))
+    
+    coords$x1<- as.numeric(as.character(coords$x1))
+    coords$x2<- as.numeric(as.character(coords$x2))
+    
+    # Plot stimuli that appeared on screen:
+    rect(coords$x1, ResY-coords$y1, coords$x2, ResY-coords$y2, col= "white", border= "#CFCBCB")
+    
+    xpos= coords$x1+ (coords$x2- coords$x1)/2
+    ypos= ResY-coords$y1- (coords$y2- coords$y1)/2
+    
+    # correct y pos of some letter for better readibility:
+    ypos<- remap_letters(coords$letter, ypos)
+    
+    # print letters:
+    text(xpos, ypos, coords$letter, col= "black")
+    
+    #symbols(raw_fix$xPos, raw_fix$yPos, circles=rep(0.1, nrow(raw_fix)))
+    
+    
+    # add saccades
+    # for (k in 1:nrow(raw_fix_temp)){
+    #   if(k==1){ next}
+    #   x1<- raw_fix_temp$xPos[k-1]+6
+    #   y1<- ResY-raw_fix_temp$yPos[k-1]
+    
+    #   if(x2>x1){
+    #     x2<- raw_fix_temp$xPos[k]-10
+    #   } else{
+    #    x2<- raw_fix_temp$xPos[k]+10
+    #   }
+    
+    #   y2<- ResY-raw_fix_temp$yPos[k]
+    
+    # fixPosX<- x1+ (x2-x1)/2
+    # fixPosY<- y1+ (y2-y1)/2
+    
+    #    arrows(x1, y1, x2, y2, col = add.alpha("blue",0.2), lty= 1, lwd=2, length=0.10)
+    
+    #text(fixPosX, fixPosY, raw_fix_temp$fix_num, col= add.alpha("blue",0.3))
+    # }
+    first<- subset(raw_fix_temp, intrasent_regr==0 & intersent_regr==0)
+    second<- subset(raw_fix_temp, intrasent_regr==1 | intersent_regr==1)
+    
+    # first-pass:
+    points(x= first$xPos, y=ResY-first$yPos, pch = 16,  col= add.alpha("green",0.20),
+           cex= 0.7*(first$fix_dur/75))
+    points(x= first$xPos, y=ResY-first$yPos, pch = 16, cex=0.7, col="green")
+    
+    # second-pass:
+    points(x= second$xPos, y=ResY-second$yPos, pch = 16,  col= add.alpha("orange",0.20),
+           cex= 0.7*(second$fix_dur/75))
+    points(x= second$xPos, y=ResY-second$yPos, pch = 16, cex=0.7, col="orange")
+    
+    # fixation numbers:
+    text(raw_fix_temp$xPos, ResY-raw_fix_temp$yPos+15, raw_fix_temp$fix_num, col= add.alpha("red",0.6))
+    
+  } else{ # end of hasText
+    
+    # plot fixations:
+    points(x= raw_fix_temp$xPos, y=ResY-raw_fix_temp$yPos, pch = 16,  col= add.alpha("blue",0.20),
+           cex= 0.7*(raw_fix_temp$fix_dur/75))
+    points(x= raw_fix_temp$xPos, y=ResY-raw_fix_temp$yPos, pch = 16, cex=0.7, col="blue")
+    
+    # fixation numbers:
+    text(raw_fix_temp$xPos, ResY-raw_fix_temp$yPos+15, raw_fix_temp$fix_num, col= add.alpha("red",0.6))
+  }
+  
+  dev.off() # close file
+  
+}
+
+
+
+
 reAlign<- function(rawfix, coords, map, ResX, ResY){
   
-  old<- rawfix
+  #------------------------------------------
+  #                Functions:
+  #------------------------------------------
+  
+  # Check for a return sweep (RS):
+  RS<- function(i, rawfix, coords, reqYthresh=TRUE, reqXthresh=TRUE, Ythresh= 1/4, Xthresh= 8, threshSimilar= 2/3){
+    
+    if(i==1){ # first fixation can't be a return sweep
+      return(0) 
+    }
+    
+    ### settings:
+    lw<- coords$x2[1]-coords$x1[1] # letter width
+    lh<- coords$y2[1]-coords$y1[1] # letter height
+    meetXthresh<- FALSE
+    meetYthresh<- FALSE
+    nextSimilar<- FALSE
+    
+    
+    #############################
+    #         conditions
+    
+    # leftward saccade?
+    leftSacc<- rawfix$xPos[i]< rawfix$xPos[i-1]
+    
+    # downward saccade?
+    downSacc<- rawfix$yPos[i]> rawfix$yPos[i-1]
+    
+    if(downSacc & reqYthresh){ # x pixels downwards required for RS 
+      Ydiff<- lh*Ythresh # threshold to be met
+      trueYdiff<- rawfix$yPos[i]- rawfix$yPos[i-1] # Y distance traveled 
+      meetYthresh<- trueYdiff >= Ydiff
+    }
+    
+    if(leftSacc & reqXthresh){ # x pixels leftwards required for RS 
+      Xdiff<- lw*Xthresh # threshold to be met
+      trueXdiff<- rawfix$xPos[i-1]- rawfix$xPos[i] # X distance traveled
+      meetXthresh<- trueXdiff >= Xdiff
+    }
+    
+    # next fixation with 'similar' Y pos?
+    if(i!= nrow(rawfix)){ # only if not the last fixation in trial..
+      howSimilar<- threshSimilar*lh # within x/yth of a letter height
+      nextSimilar<- rawfix$yPos[i+1]>= rawfix$yPos[i]- howSimilar | rawfix$yPos[i+1]<= rawfix$yPos[i]+ howSimilar
+    }
+    
+    ###### Point system:
+    #   - leftward saccade: 1 point
+    #   - leftward saccade meeting threshold: 1 point
+    #   - downward saccade: 2 points
+    #   - downward saccade meeting threshold: 1 point
+    #   - next Fix. with 'similar' Ypos: 1 point
+    #   = 6 max points
+    
+    maxPoints<- 1 +2 +1
+    if(reqYthresh){
+      maxPoints<- maxPoints+1
+    }
+    
+    if(reqXthresh){
+      maxPoints<- maxPoints+1
+    }
+    
+    #----------------------------
+    currPoints<- 0 # start with 0
+    
+    if(leftSacc){
+      currPoints<- currPoints + 1/maxPoints
+      if(meetXthresh){
+        currPoints<- currPoints+ 1/maxPoints
+      }
+    }
+    
+    if(downSacc){
+      currPoints<- currPoints +2/maxPoints
+      if(meetYthresh){
+        currPoints<- currPoints+ 1/maxPoints
+      }
+    }
+    
+    if(nextSimilar){
+      currPoints<- currPoints +1/maxPoints
+    }
+    
+   # prob<- currPoints/maxPoints
+    return(round(currPoints, 2))
+    
+  }
+  
+  
+  # Check if fixation is still on the same line (SL):
+  SL<- function(i, rawfix, coords, curr_line, xstart, xend, RSthresh= 0.8){
+    
+    if(i==1){ # first fixation will be on the first line (assuming gaze box)
+      return(1)
+    }
+    
+    # Fixation is already assigned to the current line?
+    isAssigned<- rawfix$outsideText[i]==0 & rawfix$line[i]== curr_line
+    
+    # Is current fixation a likely return sweep?
+    likelyRS<- rawfix$pRS[i]>= RSthresh
+    
+    #how much skipped info if fixation is no longer on the same line?
+    ppl<- coords$x2[1]- coords$x1[1] # pixels per letter
+    pixLeft<- xend[curr_line, 2] - rawfix$xPos[i] # pixels left until end of line
+    letLeft<- pixLeft/ppl # letters left until end of line
+    totalLetters<-  (xend[curr_line, 2]- xstart[curr_line, 2])/ ppl # num of letters on line
+    textLeft<-  totalLetters- letLeft # num letters from current xPos until end of line
+    propLeft<- textLeft/totalLetters # prop of text left on screen
+    
+    
+    ###### Point system:
+    #   - 
+    
+  }
+  
   
   #---------------------------------------
   # get some info about position of text:
@@ -507,87 +782,17 @@ reAlign<- function(rawfix, coords, map, ResX, ResY){
   }
   
   
-  #----------------------------------------------------
-  #     Re-alignment of fixations outside the text box:
-  #----------------------------------------------------
+  ####################################################
+  #            Process fixations here:               #
+  ####################################################
   
-  rawfix$reAligned<- "No"
-  rawfix$prevX<- NA
-  rawfix$prevY<- NA
-  rawfix$reason<-NA
+  rawfix$pRS<- NULL
   
   for(i in 1:nrow(rawfix)){
-    
-    if(is.na(rawfix$sent[i])){ # if fixation needs to be re-aligned
-      
-      fillIn<- FALSE
-      
-      #------------#
-      # Problem 1: # Fixation is above the first line of text
-      #------------#
-      #-->  Solution: Bring it down to the first line of text (y pos)
-      
-      if(rawfix$yPos[i]<ystart & rawfix$yPos[i]> 1){
-        
-        rawfix$prevX[i]<- rawfix$xPos[i]
-        rawfix$prevY[i]<- rawfix$yPos[i]
-        rawfix$reAligned[i]<- "Yes"
-        rawfix$yPos[i]<- ystart+1
-        fillIn<- TRUE
-        rawfix$reason[i]<- 'P1'
-      } # end of Problem 1
-        
-      
-      
-      #------------#
-      # Problem 2: # Fixation is below the last line of text
-      #------------#
-      #-->  Solution: Bring it up to the last line of text (y pos)
-      
-      if(rawfix$yPos[i]>yend & rawfix$yPos[i]< ResY){
-        rawfix$prevX[i]<- rawfix$xPos[i]
-        rawfix$prevY[i]<- rawfix$yPos[i]
-        rawfix$reAligned[i]<- "Yes"
-        rawfix$yPos[i]<- yend-1
-        fillIn<- TRUE
-        rawfix$reason[i]<- 'P2'
-      } # end of Problem 2
-      
-      
-      #-----------------------#
-      # Fill in missing info: #
-      #-----------------------#
-      
-      if(fillIn){
-        loc<- map[rawfix$yPos[i], rawfix$xPos[i]]
-        rawfix$sent[i]<- coords$sent[loc]
-        rawfix$word[i]<- coords$word[loc]
-        rawfix$line[i]<- coords$line[loc]
-        if(i==1){
-          rawfix$max_word[i]<- rawfix$word[i]
-          rawfix$max_sent[i]<- rawfix$sent[i]
-        } else{
-          if(rawfix$max_sent[i-1]< rawfix$sent[i]){
-            rawfix$max_sent[i]<- rawfix$sent[i]
-          } else{
-            rawfix$max_sent[i]<- rawfix$max_sent[i-1]
-          }
-          
-          if(!is.na(rawfix$max_word[i-1])){
-            if(rawfix$max_word[i-1]< rawfix$word[i]){
-              rawfix$max_word[i]<- rawfix$word[i]
-            } else{
-              rawfix$max_word[i]<- rawfix$max_word[i-1]
-            }
-          }
-
-        }
-      } # end of fill in
-
-      
-    }
+    rawfix$pRS[i]<- RS(i, rawfix, coords)
   }
   
+
   return(rawfix)
   
 }

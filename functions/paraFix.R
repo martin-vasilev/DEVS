@@ -5,7 +5,7 @@ paraFix<- function(data_list= "preproc/files.txt", ResX= 1920, ResY=1080, maxtri
   
   # Load functions:
   source("functions/utility.R")
-  source("functions/plot_fix.R")
+  #source("functions/plot_fix.R")
   
   data<- readLines(data_list, warn=F)
 
@@ -24,26 +24,33 @@ paraFix<- function(data_list= "preproc/files.txt", ResX= 1920, ResY=1080, maxtri
     for(j in 1:nrow(trial_db)){ # for each item
       
       text<- get_text(file[trial_db$ID[j]:trial_db$start[j]])
-      coords<- get_coord(text)
-      map<- coord_map(coords, x=ResX, y= ResY)
-      raw_fix_temp<- parse_fix(file, map, coords, trial_db[j,], i, ResX, ResY, keepLastFix)
       
-      # Align fixations:
-      if(align){
-        RFalignTemp<- reAlign(raw_fix_temp, coords, map, ResX, ResY)
-        RFalign<- rbind(RFalign, RFalignTemp)
-      }
-      
-      
-      raw_fix<- rbind(raw_fix, raw_fix_temp) # plot it
-      
-      
-      if(length(raw_fix_temp)>1 & plot==TRUE){ # if data was extracted from trial  
+      if(text!=0){ # if trial contained text
+        coords<- get_coord(text)
+        map<- coord_map(coords, x=ResX, y= ResY)
+        raw_fix_temp<- parse_fix(file, map, coords, trial_db[j,], i, ResX, ResY, keepLastFix)
+        
+        # Align fixations:
+        if(align){
+          RFalignTemp<- reAlign(raw_fix_temp, coords, map, ResX, ResY)
+          RFalign<- rbind(RFalign, RFalignTemp)
+        }
+        
+        if(length(raw_fix_temp)>1 & plot==TRUE){ # if data was extracted from trial  
+          # create picture of fixations:
+          plot_fix(coords, raw_fix_temp, i, j, ResX, ResY)
+        } 
+      } else{ # if there was no text in trial, just extract fixations
+        raw_fix_temp<- parse_fix(file, map=0, coords=0, trial_db[j,], i, ResX, ResY, keepLastFix, hasText=FALSE)
         # create picture of fixations:
-        plot_fix(coords, raw_fix_temp, i, j, ResX, ResY)
+        
+        if(length(raw_fix_temp)>1 & plot==TRUE){ # if data was extracted from trial 
+          plot_fix(coords, raw_fix_temp, i, j, ResX, ResY, hasText = FALSE)
+        }
       }
       
 
+      raw_fix<- rbind(raw_fix, raw_fix_temp) 
       
       cat(toString(j)); cat(" ")
     } # end of item loop
