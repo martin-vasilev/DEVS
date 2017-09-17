@@ -9,7 +9,7 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-knitr::opts_knit$set(root.dir = 'C:/Users/mvasilev/Documents/DEVS')
+knitr::opts_knit$set(root.dir = getwd())
 ```
 
 
@@ -28,7 +28,7 @@ sound_check<- sound_check[-blinks,]
 
 
 # remove sounds played after fixation has started:
-infix<- which(sound_check$nextFlag=="EFIX" & sound_check$delFix>5)
+infix<- which(sound_check$nextFlag=="EFIX" & sound_check$delFix>50)
 infixn<- length(infix)
 sound_check<- sound_check[-infix,]
 
