@@ -1,6 +1,6 @@
 global const Visual sent Monitor el Audio; 
 
-%const.ntrials=1; % TEMPORARY!!!
+%const.ntrials=15; % TEMPORARY!!!
 
 HideCursor;
 
@@ -79,44 +79,44 @@ for i=1:const.ntrials
 		
 		sound_type= {'STD', 'STD', 'STD', 'STD', 'STD'};
         
-        sound1 = Audio.standard;
-        sound2 = Audio.standard;
-        sound3 = Audio.standard;
-        sound4 = Audio.standard;
-        sound5 = Audio.standard;
+        sound1 = Audio.standard1;
+        sound2 = Audio.standard2;
+        sound3 = Audio.standard3;
+        sound4 = Audio.standard4;
+        sound5 = Audio.standard5;
     end
     
     
     if cond==3
         % SOUND 1
-        sound1= Audio.standard;  % 1st sound is always standard
+        sound1= Audio.standard1;  % 1st sound is always standard
 		
 		% SOUND 2
         if soundPos==2
             sound2= Audio.deviant;
         else
-            sound2= Audio.standard;
+            sound2= Audio.standard2;
         end
         
 		% SOUND 3
 		if soundPos==3
             sound3= Audio.deviant;
         else
-            sound3= Audio.standard;
+            sound3= Audio.standard3;
         end
         
 		% SOUND 4
 		if soundPos==4
             sound4= Audio.deviant;
         else
-            sound4= Audio.standard;
+            sound4= Audio.standard4;
         end
         
 		% SOUND 5
 		if soundPos==5
             sound5= Audio.deviant;
         else
-            sound5= Audio.standard;
+            sound5= Audio.standard5;
         end
         
 		sound_type= {'STD', 'STD', 'STD', 'STD', 'STD'};
@@ -296,6 +296,7 @@ for i=1:const.ntrials
                t1 = PsychPortAudio('Start', sound1, const.repetitons, 0, 1);
                %fprintf(s,'01');
                %fprintf(s,'00');
+               %fclose(s);
                tPlay1= GetSecs;
             end
             tSound1= GetSecs- tPlay1;

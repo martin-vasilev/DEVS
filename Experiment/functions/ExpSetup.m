@@ -67,24 +67,57 @@ el.cal_target_beep= [600 0 0];
 el.drif_correction_target_beep= [600 0 0];
 
 %% Open sounds:
+InitializePsychSound;
 
-% Sound 1:
 [y, freq] = wavread([cd '\corpus\' 'standard.wav']);
 wavedata = y';
 nrchannels = size(wavedata,1); % Number of rows == number of channels.
-InitializePsychSound;
-Audio.standard = PsychPortAudio('Open', [], [], 0, freq, nrchannels);
-PsychPortAudio('FillBuffer', Audio.standard, wavedata);
-%t1 = PsychPortAudio('Start', Audio.standard, const.repetitons, 0, 1);
 
-% Sound 2:
+Audio.pamaster = PsychPortAudio('Open', [], 1+8, 1, freq, nrchannels);
+PsychPortAudio('Start', Audio.pamaster, 0, 0, 1);
+
+% create slaves:
+Audio.standard1 = PsychPortAudio('OpenSlave', Audio.pamaster, 1, nrchannels);
+Audio.standard2 = PsychPortAudio('OpenSlave', Audio.pamaster, 1, nrchannels);
+Audio.standard3 = PsychPortAudio('OpenSlave', Audio.pamaster, 1, nrchannels);
+Audio.standard4 = PsychPortAudio('OpenSlave', Audio.pamaster, 1, nrchannels);
+Audio.standard5 = PsychPortAudio('OpenSlave', Audio.pamaster, 1, nrchannels);
+Audio.deviant = PsychPortAudio('OpenSlave', Audio.pamaster, 1, nrchannels);
+Audio.silence = PsychPortAudio('OpenSlave', Audio.pamaster, 1, nrchannels);
+
+% Fill standard buffers:
+PsychPortAudio('FillBuffer', Audio.standard1, wavedata);
+PsychPortAudio('FillBuffer', Audio.standard2, wavedata);
+PsychPortAudio('FillBuffer', Audio.standard3, wavedata);
+PsychPortAudio('FillBuffer', Audio.standard4, wavedata);
+PsychPortAudio('FillBuffer', Audio.standard5, wavedata);
+
+% Fill deviant buffer:
 [y, freq] = wavread([cd '\corpus\' 'deviant.wav']);
 wavedata = y';
 nrchannels = size(wavedata,1); % Number of rows == number of channels.
-InitializePsychSound;
-Audio.deviant = PsychPortAudio('Open', [], [], 0, freq, nrchannels);
 PsychPortAudio('FillBuffer', Audio.deviant, wavedata);
-%t1 = PsychPortAudio('Start', Audio.deviant, const.repetitons, 0, 1);
+
+
+
+
+% % Sound 1:
+% [y, freq] = wavread([cd '\corpus\' 'standard.wav']);
+% wavedata = y';
+% nrchannels = size(wavedata,1); % Number of rows == number of channels.
+% InitializePsychSound;
+% Audio.standard = PsychPortAudio('Open', [], [], 0, freq, nrchannels);
+% PsychPortAudio('FillBuffer', Audio.standard, wavedata);
+% %t1 = PsychPortAudio('Start', Audio.standard, const.repetitons, 0, 1);
+% 
+% % Sound 2:
+% [y, freq] = wavread([cd '\corpus\' 'deviant.wav']);
+% wavedata = y';
+% nrchannels = size(wavedata,1); % Number of rows == number of channels.
+% InitializePsychSound;
+% Audio.deviant = PsychPortAudio('Open', [], [], 0, freq, nrchannels);
+% PsychPortAudio('FillBuffer', Audio.deviant, wavedata);
+% %t1 = PsychPortAudio('Start', Audio.deviant, const.repetitons, 0, 1);
 
 %%
 % Hides the mouse cursor
