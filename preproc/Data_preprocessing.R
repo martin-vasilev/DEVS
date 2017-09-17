@@ -1,17 +1,14 @@
 
 # Martin R. Vasilev, 2017
 
-#rm(list=ls())
+rm(list=ls())
 
 source("functions/soundCheck.R")
 
 sound_check<- soundCheck()
 
 # further development:
-# was boundary crossed in a saccade?
-# how many ms before next fix started?
 # CHANGE DEFINITION OF HOOK!: crossing is not a hook if next fix is within 1 ppl 
-
 
 save(sound_check, file= "preproc/sound_check.Rda")
 write.csv(sound_check, "preproc/sound_check.csv")
