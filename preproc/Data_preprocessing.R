@@ -30,7 +30,7 @@ sound_check<- sound_check[-blinks,]
 
 
 # remove sounds played after fixation has started:
-infix<- which(sound_check$nextFlag=="EFIX" & sound_check$delFix>5)
+infix<- which(sound_check$nextFlag=="EFIX" & sound_check$delFix>50)
 infixn<- length(infix)
 sound_check<- sound_check[-infix,]
 

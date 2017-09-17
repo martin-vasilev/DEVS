@@ -87,6 +87,7 @@ Eyelink('Message', 'TRIAL OK');
 
 Screen('FillRect', Monitor.window, Visual.BGC);
 Screen('Flip', Monitor.window);
+Eyelink('command', 'clear_screen 0'); % clear tracker screen
 HideCursor;
 
 %Screen('CloseAll'); 
