@@ -25,7 +25,7 @@ paraFix<- function(data_list= "preproc/files.txt", ResX= 1920, ResY=1080, maxtri
       
       text<- get_text(file[trial_db$ID[j]:trial_db$start[j]])
       
-      if(text!=0){ # if trial contained text
+      if(text[1]!=0){ # if trial contained text
         coords<- get_coord(text)
         map<- coord_map(coords, x=ResX, y= ResY)
         raw_fix_temp<- parse_fix(file, map, coords, trial_db[j,], i, ResX, ResY, keepLastFix)

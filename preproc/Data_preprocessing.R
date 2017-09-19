@@ -72,3 +72,7 @@ if(length(out)>0){
 
 save(FD, file='data/FD.Rda')
 
+
+source("functions/nFixRG.R")
+FixRG<- nFixRG(raw_fix)
+

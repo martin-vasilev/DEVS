@@ -507,7 +507,7 @@ parse_fix<- function(file, map, coords, trial_db, i, ResX, ResY, keepLastFix, ha
 # PLOTFIX.R #
 #############
 
-plot_fix<- function(coords, raw_fix_temp, i, j, ResX, ResY, hasText=TRUE){
+plot_fix<- function(coords, raw_fix_temp, i, j, ResX, ResY, hasText=TRUE, printOriginal= TRUE){
   
   remap_letters<- function(letter, y){ # adjusted y position for easier reading
     letter<- as.character(letter)
@@ -632,6 +632,13 @@ plot_fix<- function(coords, raw_fix_temp, i, j, ResX, ResY, hasText=TRUE){
     text(raw_fix_temp$xPos, ResY-raw_fix_temp$yPos+15, raw_fix_temp$fix_num, col= add.alpha("red",0.6))
   }
   
+  # print original label:
+  
+  if(printOriginal){
+    text(ResX - 0.05*ResX, ResY -ResY*0.02, 'ORIGINAL', col= 'black', face=2)
+  }
+  
+  
   dev.off() # close file
   
 }
@@ -749,15 +756,60 @@ reAlign<- function(rawfix, coords, map, ResX, ResY){
     pixLeft<- xend[curr_line, 2] - rawfix$xPos[i] # pixels left until end of line
     letLeft<- pixLeft/ppl # letters left until end of line
     totalLetters<-  (xend[curr_line, 2]- xstart[curr_line, 2])/ ppl # num of letters on line
-    textLeft<-  totalLetters- letLeft # num letters from current xPos until end of line
+    textLeft<-  totalLetters- (totalLetters- letLeft) # num letters from current xPos until end of line
     propLeft<- textLeft/totalLetters # prop of text left on screen
     
     
     ###### Point system:
-    #   - 
+    #   - Fixation is already assigned to the current line: 2 points
+    #   - Fixation is not likely a return sweep: 1 point
+    #   - Discourage skipping text on the line: 1 points max (function of remaining text)
+    #   = max 4 points
+    
+    maxPoints<- 2+1+1
+    currPoints<- 0
+    
+    if(isAssigned){ # already assigned to same line
+      currPoints<- currPoints + 2/maxPoints
+    }
+    
+    if(!likelyRS){ # not likely a RS
+      currPoints<- currPoints + 1/maxPoints
+    }
+    
+    # weight points by amount of text left on the line (max 1)
+    currPoints<- currPoints+ (1-propLeft)/maxPoints
+    
+    currPoints<- round(currPoints,2)
+    
+    return(currPoints)
     
   }
   
+  # Re-map fixation info after re-aligning it:
+  reMap<- function(rawfix, i, map, coords, newX=NULL, newY=NULL){
+    rawfix$reAligned[i]<- 1
+    rawfix$prevLine[i]<- rawfix$line[i]
+    rawfix$prevX[i]<- rawfix$xPos[i]
+    rawfix$prevY[i]<- rawfix$yPos[i]
+    
+    if(hasArg(newX)){ # if new x to be replaced..
+      rawfix$xPos[i]<- newX
+    }
+    
+    if(hasArg(newY)){ # if new y to be replaced..
+      rawfix$yPos[i]<- newY
+    }
+    
+    # new location on the screen:
+    loc<- map[rawfix$yPos[i], rawfix$xPos[i]]
+    
+    rawfix$sent[i]<- coords$sent[loc]
+    rawfix$word[i]<- coords$word[loc]
+    rawfix$line[i]<- coords$line[loc]
+    
+    return(rawfix)
+  }
   
   #---------------------------------------
   # get some info about position of text:
@@ -767,18 +819,27 @@ reAlign<- function(rawfix, coords, map, ResX, ResY){
   yend<- coords$y2[nrow(coords)] # end of last line on y-axis
   nlines<- max(coords$line) # number of lines in trial
   
-  # x start position of each line
+  # start position of each line
   xstart<- matrix(nrow = nlines, ncol = 2, data = 0)
   xstart[1:nlines,1]<- 1:nlines
   
-  # x end position of each line
+  ystart<- matrix(nrow = nlines, ncol = 2, data = 0)
+  ystart[1:nlines,1]<- 1:nlines
+  
+  # end position of each line
   xend<- matrix(nrow = nlines, ncol = 2, data = 0)
   xend[1:nlines,1]<- 1:nlines
+  
+  yend<- matrix(nrow = nlines, ncol = 2, data = 0)
+  yend[1:nlines,1]<- 1:nlines
   
   for(i in 1:nlines){
     a<- subset(coords, line==i)
     xstart[i,2]<- a$x1[1]
     xend[i,2]<- a$x2[nrow(a)]
+    
+    ystart[i,2]<- a$y1[1]
+    yend[i,2]<- a$y2[1]
   }
   
   
@@ -787,9 +848,39 @@ reAlign<- function(rawfix, coords, map, ResX, ResY){
   ####################################################
   
   rawfix$pRS<- NULL
+  rawfix$pSL<- NULL # prob fixation is still on the same line
+  rawfix$reAligned<- 0
+  rawfix$prevX<- NA
+  rawfix$prevY<- NA
+  rawfix$prevLine<- NA
   
+  # check first fixation:
+  curr_line<- 1 # start at line 1 (assuming gaze box)
+  
+  if(rawfix$line[1]!=1){
+    if(rawfix$yPos[1]< ystart[1,2]){ # first fix is above first one
+      rawfix<- reMap(rawfix, 1, map, coords, newY= ystart[1,2]+1)
+    }
+    
+    if(rawfix$yPos[1]> yend[1,2]){ # first fix is below first line
+      rawfix<- reMap(rawfix, 1, map, coords, newY= yend[1,2]-1)
+    }
+  }
+  
+  ## Calculate probability of return sweep for each fixation:
   for(i in 1:nrow(rawfix)){
     rawfix$pRS[i]<- RS(i, rawfix, coords)
+  }
+  
+  
+  
+  for(i in 1:nrow(rawfix)){
+    rawfix$pSL[i]<- SL(i, rawfix, coords, curr_line, xstart, xend)
+    
+    if(!is.na(rawfix$line[i])){
+      curr_line<- rawfix$line[i]
+    }
+    
   }
   
 
