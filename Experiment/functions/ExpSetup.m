@@ -33,8 +33,6 @@ end
 dummymode=0;
 el=EyelinkInitDefaults(Monitor.window);
 
-%el.cal_target_beep=[1250 0 0.05];
-
 % Initialization of the connection with the Eyelink Gazetracker.
 % exit program if this fails.
 if ~EyelinkInit(dummymode)
@@ -61,10 +59,6 @@ Eyelink('command', 'file_sample_data  = LEFT,RIGHT,GAZE,AREA,GAZERES,STATUS,HTAR
 Eyelink('command', 'link_event_filter = LEFT,RIGHT,FIXATION,SACCADE,BLINK,BUTTON');
 Eyelink('command', 'link_sample_data  = LEFT,RIGHT,GAZE,GAZERES,AREA,STATUS,HTARGET');
 Eyelink('command', 'sample_rate= 1000');
-%Eyelink('command', 'set_cal_sounds("off", "off", "off")');
-
-el.cal_target_beep= [600 0 0];
-el.drif_correction_target_beep= [600 0 0];
 
 %% Open sounds:
 InitializePsychSound;
@@ -74,6 +68,7 @@ wavedata = y';
 nrchannels = size(wavedata,1); % Number of rows == number of channels.
 
 Audio.pamaster = PsychPortAudio('Open', [], 1+8, 1, freq, nrchannels);
+PsychPortAudio('Volume', Audio.pamaster, 1)
 PsychPortAudio('Start', Audio.pamaster, 0, 0, 1);
 
 % create slaves:
@@ -83,7 +78,7 @@ Audio.standard3 = PsychPortAudio('OpenSlave', Audio.pamaster, 1, nrchannels);
 Audio.standard4 = PsychPortAudio('OpenSlave', Audio.pamaster, 1, nrchannels);
 Audio.standard5 = PsychPortAudio('OpenSlave', Audio.pamaster, 1, nrchannels);
 Audio.deviant = PsychPortAudio('OpenSlave', Audio.pamaster, 1, nrchannels);
-Audio.silence = PsychPortAudio('OpenSlave', Audio.pamaster, 1, nrchannels);
+%Audio.silence = PsychPortAudio('OpenSlave', Audio.pamaster, 1, nrchannels);
 
 % Fill standard buffers:
 PsychPortAudio('FillBuffer', Audio.standard1, wavedata);
@@ -118,15 +113,4 @@ PsychPortAudio('FillBuffer', Audio.deviant, wavedata);
 % Audio.deviant = PsychPortAudio('Open', [], [], 0, freq, nrchannels);
 % PsychPortAudio('FillBuffer', Audio.deviant, wavedata);
 % %t1 = PsychPortAudio('Start', Audio.deviant, const.repetitons, 0, 1);
-
-%%
-% Hides the mouse cursor
-%HideCursor;
-
-%KbWait;
-
-
-	  
-% Restores the mouse cursor.
-% ShowCursor; 
-	
+ 

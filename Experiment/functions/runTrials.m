@@ -76,7 +76,6 @@ for i=1:const.ntrials
     
     % get sounds:
     if cond==2
-		
 		sound_type= {'STD', 'STD', 'STD', 'STD', 'STD'};
         
         sound1 = Audio.standard1;
@@ -131,7 +130,7 @@ for i=1:const.ntrials
 	stimuliOn= false;
     
     while ~stimuliOn
-        if item> const.Maxtrials
+        if item> const.Maxtrials % if practice
             Eyelink('Message', ['TRIALID ' 'P' num2str(cond) 'I' num2str(item) 'D0']);
 			% print trial ID on tracker screen:
             Eyelink('command', ['record_status_message ' [ num2str(i) ':' 'P' num2str(cond) 'I' num2str(item) 'D0']]);
@@ -150,7 +149,7 @@ for i=1:const.ntrials
         end
         
         % print text stimuli to edf:
-        stim2edf(sentenceString)
+        stim2edf(sentenceString);
         
         % prepare Screens:
         Screen('FillRect', Monitor.buffer(1), Visual.FGC, [Visual.offsetX Visual.resY/2- Visual.GazeBoxSize/2 Visual.offsetX+Visual.GazeBoxSize ...

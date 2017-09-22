@@ -9,7 +9,7 @@ clear all;
 clear mex;
 clear functions;
 
-cd('C:\Users\EyeTracker\Desktop\Martin Vasilev\DEVS')
+cd('C:\Users\EyeTracker\Desktop\Martin Vasilev\DEVS-master')
 addpath([cd '\functions'], [cd '\corpus'], [cd '\design']);
 
 settings; % load settings

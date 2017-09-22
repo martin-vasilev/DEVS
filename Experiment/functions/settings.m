@@ -1,5 +1,8 @@
 global Visual const;
 
+% USE 10% for 65
+
+
 %% Visual settings
 Visual.resX= 1920;
 Visual.resY= 1080;

@@ -7,7 +7,7 @@ global Visual;
 %Pix_per_Letter=14;
 
 pos= strfind(sentenceString, ' ');
-% boundary location is in the middle of the empty space before the critical
+% boundary location is in the beginning of the empty space before the critical
 % word
 for i=1:length(pos)
     Bnds(i)= Visual.sentPos(1)+ pos(i)*Visual.Pix_per_Letter - Visual.Pix_per_Letter/2;%+ Visual.Pix_per_Letter;
