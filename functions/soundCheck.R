@@ -1,7 +1,7 @@
 
 # Martin R. Vasilev, 2017
 
-soundCheck<- function(list_asc = "preproc/files.txt", maxtrial=120, nsounds=5, ppl=14, ResX=1920){
+soundCheck<- function(list_asc = "preproc/files.txt", maxtrial=120, nsounds=5, ppl=14, ResX=1920, soundLatency= 14){
   
   trial_info<- function(file, maxtrial, data){ # extracts information for processing trials
     ### get trial names:
@@ -196,12 +196,33 @@ soundCheck<- function(list_asc = "preproc/files.txt", maxtrial=120, nsounds=5, p
         #####
         # Time between crossing boundary and SFIX flag:
         nextSFIX<- which(grepl('SFIX', trialF[s:length(trialF)]))
+        prevSFIX<- which(grepl('SFIX', trialF[1:s]))
         nextSFIX<- nextSFIX[1] # always next fix
+        prevSFIX<- prevSFIX[length(prevSFIX)] # always last one
+        
         nextSFIX<- trialF[s+nextSFIX-1]
-        temp$tSFIX<- get_num(nextSFIX)
+        prevSFIX<- trialF[1+prevSFIX-1]
+        
+        nextSFIX<- get_num(nextSFIX)
+        prevSFIX<- get_num(prevSFIX)
+        
+        
+        if(length(nextSFIX)>0 & length(prevSFIX)>0){
+          if(!is.na(nextSFIX) & !is.na(prevSFIX)){
+            if(nextSFIX-temp$tBnd< temp$tBnd-prevSFIX){
+              temp$tSFIX<- nextSFIX
+            }else{
+              temp$tSFIX<- prevSFIX
+            }
+          }
+        }
+        
+        
+        #temp$tSFIX<- get_num(nextSFIX)
         
         # delay:
-        temp$delFix<- temp$tSFIX- temp$tBnd
+        temp$delFix<-  temp$tBnd- temp$tSFIX
+        temp$delFix<- temp$delFix+soundLatency
         
         
         ####
@@ -235,7 +256,7 @@ soundCheck<- function(list_asc = "preproc/files.txt", maxtrial=120, nsounds=5, p
         ###
         # previous fixation not on empty space?
         if(!is.na(temp$prevFix)){
-          if(round(temp$prevFix)< temp$regionS-ppl){
+          if(round(temp$prevFix)< temp$regionS-ppl/2){
             temp$prevGood<- "Yes"
           } else{
             temp$prevGood<- "No"
@@ -258,7 +279,7 @@ soundCheck<- function(list_asc = "preproc/files.txt", maxtrial=120, nsounds=5, p
         ####
         # Next fixation in critical region?
         if(!is.na(temp$nextFix)){
-          if(round(temp$nextFix)< temp$regionN1 & round(temp$nextFix)>= temp$regionS-ppl){
+          if(round(temp$nextFix)< temp$regionN1 & round(temp$nextFix)>= temp$regionS-ppl/2){
             # -ppl because fix is still in region if on the space before the critical word
             temp$inRegion<- "Yes"
           } else{
@@ -270,7 +291,7 @@ soundCheck<- function(list_asc = "preproc/files.txt", maxtrial=120, nsounds=5, p
         ###
         # Hook- boundary crossing?
         if(!is.na(temp$nextFix)){
-          if(round(temp$nextFix)<= temp$regionS){
+          if(round(temp$nextFix)<= temp$regionS -ppl/2){
             temp$hook<- "Yes"
           }else{
             temp$hook<- "No"
@@ -289,7 +310,7 @@ soundCheck<- function(list_asc = "preproc/files.txt", maxtrial=120, nsounds=5, p
           xposB[l]<- get_x(allblinks[l])
         }
         
-        targetBlink<- which(xposB >= temp$regionS-ppl & xposB<= temp$regionE)
+        targetBlink<- which(xposB >= temp$regionS-ppl/2 & xposB<= temp$regionE)
         if(length(targetBlink)>0){
           temp$blink<- "Yes"
         } else{

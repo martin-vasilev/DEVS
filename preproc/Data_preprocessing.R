@@ -27,7 +27,7 @@ sound_check<- sound_check[-blinks,]
 
 
 # remove sounds played after fixation has started:
-infix<- which(sound_check$nextFlag=="EFIX" & sound_check$delFix>50)
+infix<- which(sound_check$delFix>14)
 infixn<- length(infix)
 sound_check<- sound_check[-infix,]
 
@@ -35,7 +35,7 @@ cat(sprintf("%f percent of data excluded due to blinks", (nblinks/nobs)*100))
 cat(sprintf("%f percent of data excluded due to in-fixations", (infixn/nobs)*100))
 cat(sprintf("%f percent of data remains for analysis", (nrow(sound_check)/nobs)*100))
 
-sound_check<- subset(sound_check, delFix<80)
+#sound_check<- subset(sound_check, delFix<80)
 
 
 ###############################
@@ -51,6 +51,7 @@ raw_fix<- assign_cond(sound_check, raw_fix)
 
 raw_fix<- subset(raw_fix, out==0 & blink==0)
 #110
+
 
 
 # Merge any fixations <80ms within a character:
@@ -75,4 +76,11 @@ save(FD, file='data/FD.Rda')
 
 source("functions/nFixRG.R")
 FixRG<- nFixRG(raw_fix)
+
+
+tw<- subset(raw_fix, is.element(word, c(3,5,7,9,11)))
+tw<- subset(FD, is.element(word, c(3,5,7,9,11)))
+
+# Do fixations on non-target words as a function of experimental block
+
 

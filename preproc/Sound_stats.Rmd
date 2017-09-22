@@ -21,14 +21,14 @@ load("C:/Users/mvasilev/Documents/DEVS/preproc/sound_check.Rda")
 
 nobs<- nrow(sound_check)
 
-# remove blinks on critical words:
+# remove blinks on target words:
 blinks<- which(sound_check$blink=='Yes')
 nblinks<- length(blinks)
 sound_check<- sound_check[-blinks,]
 
 
 # remove sounds played after fixation has started:
-infix<- which(sound_check$nextFlag=="EFIX" & sound_check$delFix>50)
+infix<- which(sound_check$delFix>14)
 infixn<- length(infix)
 sound_check<- sound_check[-infix,]
 
@@ -41,7 +41,7 @@ sound_check<- subset(sound_check, delFix<80)
 
 ```
 - based on `r length(unique(sound_check$sub))` unique subjects
-- `r (nblinks/nobs)*100` % of data was excluded due to blinks on critical words
+- `r (nblinks/nobs)*100` % of data was excluded due to blinks on target words
 - `r (infixn/nobs)*100` % of data was excluded due to late triggering of the sound (command sent after start of fixation)
 - `r (nrow(sound_check)/nobs)*100` % of data remains for analysis 
 
@@ -51,14 +51,14 @@ Time in ms between sending the command to play sound and the end of the saccade 
 
 Note that technology doesn't allow absolute time-locking to the onset of fixation. The reason for this is that Eyelink's algorithm for online parsing of fixations requires about 35 ms to obtain enough samples to detect the start of a fixation. Therefore, if you wait for this flag from the system, the fixation would have already started ~ 35 ms ago. This is clearly too much delay for the present study. The best approach (adopted here) is to trigger the sound as soon as the eye reaches the middle of the empty space before the word. Usually, this happens towards the end of the saccade. The data above show how many ms passed from triggering the sound to the start of the next fixation. 
 
-The sound in this experiment requires 14 ms from sending the 'play' command to the signal coming out from the speakers. Since the command to play the sound is sent several ms before the start of fixation on the critical word, this means that participants will hear the sound within several ms after the start of fixation. In other words, the latency between the start of fixation on the critical word and participants hearing the sound is: 14 ms - time between sending the command and the start of fixation. The distribution of this latency is shown below:
+The sound in this experiment requires 14 ms from sending the 'play' command to the signal coming out from the speakers. Since the command to play the sound is sent several ms before the start of fixation on the target word, this means that participants will hear the sound within several ms after the start of fixation. In other words, the latency between the start of fixation on the target word and participants hearing the sound is: 14 ms - time between sending the command and the start of fixation. The distribution of this latency is shown below:
 
 
 
 ```{r, echo= FALSE}
-hist(14- sound_check$delFix, xlab= "Sound onset delay relative to fixation onset of the critical word", main= "Sound implementation timing", family= "serif", col="lightgreen", freq=FALSE, breaks=30)
+hist(sound_check$delFix, xlab= "Sound onset delay relative to fixation onset of the target word", main= "Sound implementation timing", family= "serif", col="lightgreen", freq=FALSE, breaks=30) # , xlim= c(-50, 20)
 abline(v = mean(sound_check$delFix, na.rm=T), col= "darkred", lwd=3)
-curve(dnorm(x, mean=mean(14- sound_check$delFix, na.rm=T), sd=sd(14-sound_check$delFix, na.rm=T)), add=TRUE, col="darkblue", lwd=2) 
+curve(dnorm(x, mean=mean(sound_check$delFix, na.rm=T), sd=sd(sound_check$delFix, na.rm=T)), add=TRUE, col="darkblue", lwd=2) 
 
 ```
 
@@ -69,7 +69,7 @@ The pace of the sound presentation is determined by participants, in the sense t
 Mean: `r mean(sound_check$ISI, na.rm=T)`. SD: `r sd(sound_check$ISI, na.rm=T)`. Range: `r range(sound_check$ISI, na.rm=T)`. 
 
 ```{r, echo= FALSE}
-hist(sound_check$ISI-50, xlab= "ISI between two consequitive sounds", main= "ISI timing", family= "serif", col="lightgreen", freq=FALSE, breaks=30)
+hist(sound_check$ISI-50, xlab= "ISI between two consequitive sounds", main= "ISI timing", family= "serif", col="lightgreen", freq=FALSE, breaks=30, xlim= range(sound_check$ISI, na.rm=T))
 abline(v = mean(sound_check$ISI-50, na.rm=T), col= "darkred", lwd=3)
 curve(dnorm(x, mean=mean(sound_check$ISI-50, na.rm=T), sd=sd(sound_check$ISI-50, na.rm=T)), add=TRUE, col="darkblue", lwd=2) 
 
@@ -78,7 +78,7 @@ curve(dnorm(x, mean=mean(sound_check$ISI-50, na.rm=T), sd=sd(sound_check$ISI-50,
 
 ## Descriptive statistics:
 
-### Fixation duration measures (on critical words):
+### Fixation duration measures (on target words):
 
 ```{r, echo=FALSE}
 load("C:/Users/mvasilev/Documents/DEVS/data/FD.Rda")
@@ -86,8 +86,9 @@ load("C:/Users/mvasilev/Documents/DEVS/data/FD.Rda")
 load_package('reshape')
 FD<- subset(FD,!is.na(sound))
 FD$sound<- as.factor(FD$sound)
+tw<- subset(FD, is.element(word, c(3,5,7,9,11)))
 
-DesFix<- melt(FD, id=c('sub', 'item', 'cond', 'sound'), 
+DesFix<- melt(tw, id=c('sub', 'item', 'cond', 'sound'), 
               measure=c("FFD", "GD", "TVT"), na.rm=TRUE)
 mFix<- cast(DesFix, sound ~ variable
             , function(x) c(M=signif(mean(x),3)
@@ -139,7 +140,7 @@ Dplot
 FFD: First fixation duration. GD: gaze duration (the sum of all fixations before moving on to another word). TVT: Total viewing time (the sum of all fixations, including the ones made during a regression).
 
 
-### Probability of regression to the critical words:
+### Probability of regression to the target words:
 
 ```{r, echo=FALSE}
 load("C:/Users/mvasilev/Documents/DEVS/data/raw_fix.Rda")
@@ -163,7 +164,7 @@ load_package('knitr')
 
 `r kable(mReg)`
 
-### Number of fixations on critical region
+### Number of fixations on target region
 
 ```{r, echo=FALSE}
 
