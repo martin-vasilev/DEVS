@@ -16,8 +16,17 @@ knitr::opts_knit$set(root.dir = getwd())
 ## Data pre-processing:
 
 ```{r, echo= FALSE}
+
+office= F
+
 source("https://raw.githubusercontent.com/martin-vasilev/R_scripts/master/useful_functions.R")
-load("C:/Users/mvasilev/Documents/DEVS/preproc/sound_check.Rda")
+
+if(office){
+    load("C:/Users/mvasilev/Documents/DEVS/preproc/sound_check.Rda")
+} else{
+    load("C:/Users/Martin Vasilev/Documents/DEVS/preproc/sound_check.Rda")
+  }
+
 
 nobs<- nrow(sound_check)
 
@@ -81,7 +90,12 @@ curve(dnorm(x, mean=mean(sound_check$ISI-50, na.rm=T), sd=sd(sound_check$ISI-50,
 ### Fixation duration measures (on target words):
 
 ```{r, echo=FALSE}
-load("C:/Users/mvasilev/Documents/DEVS/data/FD.Rda")
+if(office){
+  load("C:/Users/mvasilev/Documents/DEVS/data/FD.Rda")
+}else{
+  load("C:/Users/Martin Vasilev/Documents/DEVS/data/FD.Rda")
+}
+
 
 load_package('reshape')
 FD<- subset(FD,!is.na(sound))
@@ -143,7 +157,13 @@ FFD: First fixation duration. GD: gaze duration (the sum of all fixations before
 ### Probability of regression to the target words:
 
 ```{r, echo=FALSE}
-load("C:/Users/mvasilev/Documents/DEVS/data/raw_fix.Rda")
+if(office){
+  load("C:/Users/mvasilev/Documents/DEVS/data/raw_fix.Rda")
+} else{
+  load("C:/Users/Martin Vasilev/Documents/DEVS/data/raw_fix.Rda")
+}
+
+
 raw_fix<- subset(raw_fix,!is.na(sound))
 raw_fix$sound<- as.factor(raw_fix$sound)
 
