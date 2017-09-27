@@ -46,13 +46,12 @@ source("functions/paraFix.R")
 source("functions/assign_cond.R")
 
 raw_fix<- paraFix(plot=F, align = F)
+raw_fix<- subset(raw_fix, outsideText==0)
 
 raw_fix<- assign_cond(sound_check, raw_fix)
 
 raw_fix<- subset(raw_fix, out==0 & blink==0)
 #110
-
-
 
 # Merge any fixations <80ms within a character:
 source("functions/less80.R")
@@ -60,6 +59,9 @@ raw_fix<- less80(raw_fix)
 l80<- which(raw_fix$fix_dur<80)
 raw_fix<- raw_fix[-l80,]
 save(raw_fix, file= "data/raw_fix.Rda")
+
+source('functions/map_by_pos.R')
+MF<- map_by_pos(raw_fix)
 
 
 source("functions/reading_times.R")
