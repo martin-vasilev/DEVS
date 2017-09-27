@@ -46,9 +46,22 @@ Eyelink('Message', 'SYNCTIME');
 
 
 answer=-1; 
+escapeKey= KbName('ESCAPE');
+confirmKey= KbName('Y');
 
 while answer<0
     [x,y,buttons] = GetMouse(Monitor.window);
+    
+    [keyIsDown, seconds, keyCode]= KbCheck;
+    keyCode= find(keyCode,1);
+    if keyCode== escapeKey
+  
+        status= Eyelink('ReceiveFile');
+        Eyelink('Shutdown');
+        Screen('CloseAll');
+        error('Experiment terminated by user');
+    end
+    
     if buttons(1)==1
         if IsInRect(x,y, yes_dim) %x> yes_dim(1) && y> yes_dim(2) && x< yes_dim(3) && y< yes_dim(4)
             Screen('DrawText', Monitor.window, question , Visual.sentPos(1), Visual.sentPos(2), Visual.FGC) % sentence

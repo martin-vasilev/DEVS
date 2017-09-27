@@ -26,13 +26,13 @@ Visual.gazeBoxDisplayTime= 7; % how many seconds to wait to trigger the gaze box
 const.TrialTimeout= 60; % automatically terminates trial after x seconds
 const.ncond= 4; % number of conditions
 const.Maxtrials= 120; % number of experimental trials
-const.soundDur= 0.06; % min duration between playing 2 sounds
+const.soundDur= 0.06; % min duration between playing 2 sounds (in seconds)
 const.repetitons=1; % how many times to play sounds
-const.seeEye= false; % if true, shows gaze position as a dot on the screen
+const.seeEye= false; % if true, shows gaze position as a dot on the screen (for testing only!!)
 const.maxCross= 1800; % what is the max location for crossing a gaze-contingent boundary?
 
 const.checkPPL= false;  % if true, draws a rectangle around sentence to make sure letter width is correct
-const.expName = 'DEVS'; % used for saving data (keep short)
+const.expName = 'DEVS'; % used for saving data (keep at <= 5 letters)
 const.caltype= 'H3'; % calibration; use 'HV9' for 9-point grid
 const.saccvelthresh = 35;% degrees per second, saccade velocity threshold
 const.saccaccthresh = 9500; % degrees per second, saccade acceleration threshold	

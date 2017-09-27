@@ -1,6 +1,6 @@
 global const Visual sent Monitor el Audio; 
 
-%const.ntrials=15; % TEMPORARY!!!
+%const.ntrials=5; % TEMPORARY!!!
 
 HideCursor;
 
