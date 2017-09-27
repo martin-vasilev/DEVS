@@ -78,6 +78,8 @@ save(FD, file='data/FD.Rda')
 
 source("functions/nFixRG.R")
 FixRG<- nFixRG(raw_fix)
+save(FixRG, file='data/FixRG.Rda')
+
 
 
 tw<- subset(raw_fix, is.element(word, c(3,5,7,9,11)))

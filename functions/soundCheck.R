@@ -256,7 +256,7 @@ soundCheck<- function(list_asc = "preproc/files.txt", maxtrial=120, nsounds=5, p
         ###
         # previous fixation not on empty space?
         if(!is.na(temp$prevFix)){
-          if(round(temp$prevFix)< temp$regionS-ppl/2){
+          if(round(temp$prevFix)< temp$regionS-1){ #ppl/2
             temp$prevGood<- "Yes"
           } else{
             temp$prevGood<- "No"
@@ -279,7 +279,7 @@ soundCheck<- function(list_asc = "preproc/files.txt", maxtrial=120, nsounds=5, p
         ####
         # Next fixation in critical region?
         if(!is.na(temp$nextFix)){
-          if(round(temp$nextFix)< temp$regionN1 & round(temp$nextFix)>= temp$regionS-ppl/2){
+          if(round(temp$nextFix)< temp$regionN1 & round(temp$nextFix)>= temp$regionS-1){ # ppl/2
             # -ppl because fix is still in region if on the space before the critical word
             temp$inRegion<- "Yes"
           } else{
@@ -291,7 +291,7 @@ soundCheck<- function(list_asc = "preproc/files.txt", maxtrial=120, nsounds=5, p
         ###
         # Hook- boundary crossing?
         if(!is.na(temp$nextFix)){
-          if(round(temp$nextFix)<= temp$regionS -ppl/2){
+          if(round(temp$nextFix)<= temp$regionS -1){ # ppl/2
             temp$hook<- "Yes"
           }else{
             temp$hook<- "No"
@@ -310,7 +310,7 @@ soundCheck<- function(list_asc = "preproc/files.txt", maxtrial=120, nsounds=5, p
           xposB[l]<- get_x(allblinks[l])
         }
         
-        targetBlink<- which(xposB >= temp$regionS-ppl/2 & xposB<= temp$regionE)
+        targetBlink<- which(xposB >= temp$regionS-1 & xposB<= temp$regionE)# ppl/2
         if(length(targetBlink)>0){
           temp$blink<- "Yes"
         } else{

@@ -5,6 +5,8 @@ nFixRG<- function(data){
   dataN<- NULL; dataT<- NULL; q<- NULL; r<- NULL; sent<- NULL
   FFD<- NULL; nfix1<- NULL; nfix2<-NULL; nfixAll<- NULL; sound<- NULL
   
+  library(readr)
+  
   cat("Processing data for subject... ");
   
   for(i in 1:length(unique(data$sub))){ # for each subect..
@@ -12,6 +14,10 @@ nFixRG<- function(data){
     nitems<- unique(data$item[data$sub==i])# trials that participant saw
     nitems<- sort(nitems)
     cat(paste(i, " ", sep=""));
+    
+    design<- read_delim(paste("design/P", toString(i), ".txt", sep= ""), 
+                        " ", escape_double = FALSE, trim_ws = TRUE)
+    design<- subset(design, item<121)
     
     for(j in 1: length(nitems)){ # for each item of subect i
       
@@ -22,6 +28,7 @@ nFixRG<- function(data){
         q<- subset(n, sent==o[k])
         #r<- sort(unique(q$word))
         r<- c(3,5,7,9,11)
+        w<- c(1,2,3,4,5)
         
         for(l in 1:length(r)){ # for each word in sentence k
           word[l]<- r[l] # critical word  
@@ -35,6 +42,27 @@ nFixRG<- function(data){
           ### Refixation conditional:
           p<- subset(q, word==r[l])
           sound[l]<- p$sound[1]
+          
+          if(is.na(sound[l])){ # target was skipped, but next word was fixated
+            if(cond[l]==1){
+              sound[l]<- 'SLC'
+            }
+            if(cond[l]==2){
+              sound[l]<- 'STD'
+            }
+            
+            if(cond[l]==3){
+              a<- which(design$item==item[l] & design$pos== w[l])
+              if(length(a)==0){
+                sound[l]<- 'STD'
+              } else{
+                sound[l]<- 'DEV'
+              }
+              
+            }
+            
+          }
+          
           p<- subset(q, word==r[l] | word==r[l]+1)
           
           # first-pass fixations:

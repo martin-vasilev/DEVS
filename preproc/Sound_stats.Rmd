@@ -1,7 +1,7 @@
 ---
 title: "Sound stats"
 author: "Martin R Vasilev"
-date: "14 September 2017"
+date: "27 September 2017"
 output:
   pdf_document: default
   html_document: default
@@ -17,7 +17,7 @@ knitr::opts_knit$set(root.dir = getwd())
 
 ```{r, echo= FALSE}
 
-office= F
+office= T
 
 source("https://raw.githubusercontent.com/martin-vasilev/R_scripts/master/useful_functions.R")
 
@@ -49,41 +49,42 @@ sound_check<- subset(sound_check, delFix<80)
 
 
 ```
-- based on `r length(unique(sound_check$sub))` unique subjects
+- based on `r length(unique(sound_check$sub))` subjects
 - `r (nblinks/nobs)*100` % of data was excluded due to blinks on target words
 - `r (infixn/nobs)*100` % of data was excluded due to late triggering of the sound (command sent after start of fixation)
 - `r (nrow(sound_check)/nobs)*100` % of data remains for analysis 
 
+
 ## Timing of sound:
 
-Time in ms between sending the command to play sound and the end of the saccade that triggered the sound. Mean: `r mean(sound_check$delFix, na.rm=T)`. SD: `r sd(sound_check$delFix, na.rm=T)`. Range: `r range(sound_check$delFix, na.rm=T)`. 
+Time in ms between sending the command to play the sound and the end of the saccade that triggered the sound: Mean: `r round(mean(sound_check$delFix, na.rm=T),1)`. SD: `r round(sd(sound_check$delFix, na.rm=T),1)`. Range: `r range(sound_check$delFix, na.rm=T)`. 
 
-Note that technology doesn't allow absolute time-locking to the onset of fixation. The reason for this is that Eyelink's algorithm for online parsing of fixations requires about 35 ms to obtain enough samples to detect the start of a fixation. Therefore, if you wait for this flag from the system, the fixation would have already started ~ 35 ms ago. This is clearly too much delay for the present study. The best approach (adopted here) is to trigger the sound as soon as the eye reaches the middle of the empty space before the word. Usually, this happens towards the end of the saccade. The data above show how many ms passed from triggering the sound to the start of the next fixation. 
+Note that technology doesn't allow absolute time-locking to the onset of fixation. The reason for this is that Eyelink's algorithm for online parsing of fixations requires about 35 ms to obtain enough samples to detect the start of a fixation. Therefore, if you wait for this flag from the system, the fixation would have already started ~ 35 ms ago. This is clearly too much delay for the present study. The best approach (adopted here) is to trigger the sound as soon as the eye crosses the start of the empty space before the word. Usually, this happens towards the end of the saccade. The data above show how many ms passed from triggering the sound to the start of the next fixation. 
 
-The sound in this experiment requires 14 ms from sending the 'play' command to the signal coming out from the speakers. Since the command to play the sound is sent several ms before the start of fixation on the target word, this means that participants will hear the sound within several ms after the start of fixation. In other words, the latency between the start of fixation on the target word and participants hearing the sound is: 14 ms - time between sending the command and the start of fixation. The distribution of this latency is shown below:
-
+The sound in this experiment requires 14 ms from sending the 'play' command to the signal coming out from the speakers. Since the command to play the sound is sent several ms before the start of fixation on the target word, this means that participants will usually hear the sound within several ms after the start of fixation. In other words, the latency between the start of fixation on the target word and participants hearing the sound is: 14 ms - time period between sending the command and the start of fixation. The distribution of this latency is shown below:
 
 
 ```{r, echo= FALSE}
-hist(sound_check$delFix, xlab= "Sound onset delay relative to fixation onset of the target word", main= "Sound implementation timing", family= "serif", col="lightgreen", freq=FALSE, breaks=30) # , xlim= c(-50, 20)
+hist(sound_check$delFix, xlab= "Sound onset delay (in ms) relative to fixation onset of the target word", main= "Sound implementation timing", family= "serif", col="lightgreen", freq=FALSE, breaks=30, xlim= c(-20, 20)) # , xlim= c(-20, 20)
 abline(v = mean(sound_check$delFix, na.rm=T), col= "darkred", lwd=3)
 curve(dnorm(x, mean=mean(sound_check$delFix, na.rm=T), sd=sd(sound_check$delFix, na.rm=T)), add=TRUE, col="darkblue", lwd=2) 
 
+s2<- subset(sound_check, sound_type!="SLC")
 ```
+*Note*: Extreme values due to long saccades are removed from this graph (`r round((length(which(sound_check$delFix< -20))/ nrow(sound_check))*100, 1)` %).
 
 ## Inter-stimulus Interval (ISI):
 
-The pace of the sound presentation is determined by participants, in the sense that it depends on how long they fixate words in the sentence. For this reason, it's useful to know what is the average interval between playing two consequitive sounds. 
+The pace of the sound presentation is determined by participants, in the sense that it depends on how long they fixate words in the sentence. For this reason, it's useful to know what is the average interval between playing two consecutive sounds: Mean: `r round(mean(s2$ISI-50, na.rm=T))`. SD: `r round(sd(s2$ISI-50, na.rm=T))`. Range: `r range(s2$ISI-50, na.rm=T)`. 
 
-Mean: `r mean(sound_check$ISI, na.rm=T)`. SD: `r sd(sound_check$ISI, na.rm=T)`. Range: `r range(sound_check$ISI, na.rm=T)`. 
+*Note*: The experiment has a mechanism that prevents two sounds from playing at the same time. If there are fewer than 10 ms since the previous sound stopped playing, the experiment will wait before playing the next sound. This prevents overlapping sounds when participants make a longe saccade and trigger multiple sounds.
 
 ```{r, echo= FALSE}
-hist(sound_check$ISI-50, xlab= "ISI between two consequitive sounds", main= "ISI timing", family= "serif", col="lightgreen", freq=FALSE, breaks=30, xlim= range(sound_check$ISI, na.rm=T))
-abline(v = mean(sound_check$ISI-50, na.rm=T), col= "darkred", lwd=3)
-curve(dnorm(x, mean=mean(sound_check$ISI-50, na.rm=T), sd=sd(sound_check$ISI-50, na.rm=T)), add=TRUE, col="darkblue", lwd=2) 
+hist(s2$ISI-50, xlab= "ISI between two consecutive sounds (in ms)", main= "ISI timing", family= "serif", col="lightgreen", freq=FALSE, breaks=30, xlim= range(s2$ISI, na.rm=T))
+abline(v = mean(s2$ISI-50, na.rm=T), col= "darkred", lwd=3)
+curve(dnorm(x, mean=mean(s2$ISI-50, na.rm=T), sd=sd(s2$ISI-50, na.rm=T)), add=TRUE, col="darkblue", lwd=2) 
 
 ```
-
 
 ## Descriptive statistics:
 
@@ -184,15 +185,33 @@ load_package('knitr')
 
 `r kable(mReg)`
 
-### Number of fixations on target region
+
+Greater regression probability is usually associated with difficulty in sentence processing. For example, if word processing was affected somehow when participants heard a noise, they may be more likely to make a regression back to it and re-read it.
+
+### Number of fixations on target region:
+
+The sound manipulation may affect not only the word on which a sound is played, but also the next word (where no sound is played). I use the term 'target region' to refer to these two words together. For example, since we play sounds on the 3rd, 5th, 7th, 9th, and 11th word, the first target region would be word 3 + word 4, the second target region would be word 5 + word 6 and so on. 
 
 ```{r, echo=FALSE}
+if(office){
+  load("C:/Users/mvasilev/Documents/DEVS/data/FixRG.Rda")
+} else{
+  load("C:/Users/Martin Vasilev/Documents/DEVS/data/FixRG.Rda")
+}
 
+FixRG$sound<- as.factor(FixRG$sound)
 
+DesRG<- melt(FixRG, id=c('sub', 'item', 'cond', 'sound'), 
+              measure=c("nfix1", "nfix2", "nfixAll"), na.rm=TRUE)
+mRG<- cast(DesRG, sound ~ variable
+            , function(x) c(M=signif(mean(x),3)
+                            , SD= sd(x) ))
+mRG[,c(3,5,7)]<- round(mRG[,c(3,5,7)],2)
+
+colnames(mRG)<- c('Sound', 'First-pass (mean)', 'First-pass (SD)', 'Second-pass (mean)', 'Second-pass (SD)',
+                  'All (mean)', 'All (SD')
+#mRG$Sound<- factor(mRG$Sound, levels=c("DEV", "STD", "SLC"))
+levels(mRG$Sound)<- c('Standard', 'Deviant', 'Silence')
 ```
 
-
-
-
-
-
+`r kable(mRG)`

@@ -1,10 +1,10 @@
 
 map_by_pos<- function(data, remove=T){
-  
+  library(readr)
   dataN<- NULL
   
   for(i in 1:length(unique(data$sub))){
-    design<- read_delim(paste("~/DEVS/design/P", toString(i), ".txt", sep= ""), 
+    design<- read_delim(paste("design/P", toString(i), ".txt", sep= ""), 
                         " ", escape_double = FALSE, trim_ws = TRUE)
     design<- subset(design, item<121)
     
