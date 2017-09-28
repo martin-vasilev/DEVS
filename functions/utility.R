@@ -423,6 +423,12 @@ parse_fix<- function(file, map, coords, trial_db, i, ResX, ResY, keepLastFix, ha
           }
         }
       }
+    
+    if(fix$x[j]<0){
+      loc<- NA
+      outOfBnds[j]<- 1
+      outsideText[j]<- 1
+    }
    
     
     if(hasText){   

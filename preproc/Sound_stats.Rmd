@@ -17,7 +17,7 @@ knitr::opts_knit$set(root.dir = getwd())
 
 ```{r, echo= FALSE}
 
-office= T
+office= F
 
 source("https://raw.githubusercontent.com/martin-vasilev/R_scripts/master/useful_functions.R")
 
