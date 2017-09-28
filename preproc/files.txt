@@ -1,1 +1,3 @@
 preproc/raw_data/DEVS1.asc
+preproc/raw_data/DEVS2.asc
+preproc/raw_data/DEVS3.asc

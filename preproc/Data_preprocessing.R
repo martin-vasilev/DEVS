@@ -65,7 +65,8 @@ MF<- map_by_pos(raw_fix)
 
 
 source("functions/reading_times.R")
-FD<- reading_measures(raw_fix)
+#FD<- reading_measures(raw_fix)
+FD<- reading_measures(MF)
 
 out<- which(FD$FFD>800 | FD$GD>2000 | FD$TVT>3000)
 
@@ -77,7 +78,8 @@ save(FD, file='data/FD.Rda')
 
 
 source("functions/nFixRG.R")
-FixRG<- nFixRG(raw_fix)
+#FixRG<- nFixRG(raw_fix)
+FixRG<- nFixRG(MF)
 save(FixRG, file='data/FixRG.Rda')
 
 
@@ -87,4 +89,11 @@ tw<- subset(FD, is.element(word, c(3,5,7,9,11)))
 
 # Do fixations on non-target words as a function of experimental block
 
+
+
+DesFix<- melt(FD, id=c('sub', 'item', 'cond', 'sound'), 
+                           measure=c("FFD", "GD", "TVT"), na.rm=TRUE)
+mFix<- cast(DesFix, sound ~ variable
+                        ,function(x) c(M=signif(mean(x),3)
+                              , SD= sd(x) ))
 

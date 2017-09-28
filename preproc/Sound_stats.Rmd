@@ -17,7 +17,7 @@ knitr::opts_knit$set(root.dir = getwd())
 
 ```{r, echo= FALSE}
 
-office= F
+office= T
 
 source("https://raw.githubusercontent.com/martin-vasilev/R_scripts/master/useful_functions.R")
 
@@ -46,8 +46,6 @@ sound_check<- sound_check[-infix,]
 #cat(sprintf("%d percent of data remains for analysis", (nrow(sound_check)/nobs)*100))
 
 sound_check<- subset(sound_check, delFix<80)
-
-
 ```
 - based on `r length(unique(sound_check$sub))` subjects
 - `r (nblinks/nobs)*100` % of data was excluded due to blinks on target words
