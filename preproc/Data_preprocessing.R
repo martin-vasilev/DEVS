@@ -97,6 +97,7 @@ if(length(out)>0){
 }
 
 FD$keep<- 0
+FD$keepN1<- 0
 
 for(i in 1:nrow(FD)){
   a<- which(sound_check$sub== FD$sub[i] & sound_check$item== FD$item[i] & sound_check$word== FD$word[i])
@@ -104,26 +105,34 @@ for(i in 1:nrow(FD)){
   if(length(a)>0){
     FD$keep[i]<- 1
     FD$sound[i]<- sound_check$sound_type[a]
+    
+    b<- which(FD$item== FD$item[i] & FD$sub== FD$sub[i] & FD$word== FD$word[i]+1)
+    if(length(b>0)){
+      FD$keepN1[b]<- 1
+      FD$sound[b]<- sound_check$sound_type[a]
+    }
+    
   }
 }
 
 TW<- subset(FD, keep==1)
+N1<- subset(FD, keepN1==1)
 
 FD<- TW
 save(FD, file='data/FD.Rda')
+save(N1, file='data/N1.Rda')
 
 
+#FD$keep<- 0
 
-FD$keep<- 0
-
-for(i in 1:nrow(FD)){
-  a<- which(sound_check$sub== FD$sub[i] & sound_check$item== FD$item[i] & sound_check$word== FD$word[i])
+#for(i in 1:nrow(FD)){
+#  a<- which(sound_check$sub== FD$sub[i] & sound_check$item== FD$item[i] & sound_check$word== FD$word[i])
   
-  if(length(a)>0){
-    FD$keep[i]<- 1
-    FD$sound[i]<- sound_check$sound_type[a]
-  }
-}
+#  if(length(a)>0){
+##    FD$keep[i]<- 1
+#    FD$sound[i]<- sound_check$sound_type[a]
+#  }
+#}
 
 
 #source("functions/nFixRG.R")
@@ -151,5 +160,24 @@ mFix<- cast(DesFix, sound_type ~ variable
 DesFix<- melt(TW, id=c('sub', 'item', 'cond', 'sound'), 
               measure=c("FFD", "GD", "TVT"), na.rm=TRUE)
 mTW<- cast(DesFix, sound ~ variable
+            ,function(x) c(M=signif(mean(x),3)
+                           , SD= sd(x) ))
+
+
+DesLen<- melt(sound_check, id=c('sub', 'item', 'cond', 'sound_type'), 
+              measure=c("N1len", "N2len"), na.rm=TRUE)
+mLen<- cast(DesLen, sound_type ~ variable
+            ,function(x) c(M=signif(mean(x),3)
+                           , SD= sd(x) ))
+
+DesReg<- melt(sound_check, id=c('sub', 'item', 'cond', 'sound_type'), 
+              measure=c("N1reg", "N2reg"), na.rm=TRUE)
+mReg<- cast(DesReg, sound_type ~ variable
+            ,function(x) c(M=signif(mean(x),3)
+                           , SD= sd(x) ))
+
+DesN1<- melt(N1, id=c('sub', 'item', 'cond', 'sound'), 
+              measure=c("FFD", "GD", "TVT"), na.rm=TRUE)
+mN1<- cast(DesN1, sound ~ variable
             ,function(x) c(M=signif(mean(x),3)
                            , SD= sd(x) ))

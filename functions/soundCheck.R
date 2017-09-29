@@ -191,14 +191,36 @@ soundCheck<- function(list_asc = "preproc/files.txt", maxtrial=120, nsounds=5, p
         ####
         # next fixation:
         nextfix<- which(grepl('EFIX', trialF[s:length(trialF)]))
+        nextfix3<- nextfix[3]
         nextfix2<- nextfix[2]
         nextfix<- nextfix[1] # always next fix
         nextfix<- trialF[s+nextfix-1]
         nextfix2<- trialF[s+nextfix2-1]
+        nextfix3<- trialF[s+nextfix3-1]
         temp$nextFix<- as.numeric(unlist(strsplit(nextfix, "\t"))[4])
         temp$N1<- as.numeric(unlist(strsplit(nextfix, "\t"))[3])
         temp$N2<- as.numeric(unlist(strsplit(nextfix2, "\t"))[3])
+        temp$N1x<- as.numeric(unlist(strsplit(nextfix2, "\t"))[4])
+        temp$N2x<- as.numeric(unlist(strsplit(nextfix3, "\t"))[4])
+        temp$N1len<- (abs(temp$N1x- temp$nextFix))/ppl
+        temp$N2len<- (abs(temp$N2x- temp$N1x))/ppl
         
+        # Regression after hearing sound
+        if(!is.na(temp$N1x) & !is.na(temp$nextFix)){
+          if(temp$N1x< temp$nextFix){
+            temp$N1reg<- 1
+          }else{
+            temp$N1reg<- 0
+          }
+        }
+
+        if(!is.na(temp$N2x) & !is.na(temp$N1x)){
+          if(temp$N2x< temp$N1x){
+            temp$N2reg<- 1
+          }else{
+            temp$N2reg<- 0
+          }
+        }
         
         #####
         # Time between crossing boundary and SFIX flag:

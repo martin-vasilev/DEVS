@@ -19,13 +19,13 @@ knitr::opts_knit$set(root.dir = getwd())
 
 office= T
 
-source("https://raw.githubusercontent.com/martin-vasilev/R_scripts/master/useful_functions.R")
+#source("https://raw.githubusercontent.com/martin-vasilev/R_scripts/master/useful_functions.R")
 
 if(office){
     load("C:/Users/mvasilev/Documents/DEVS/preproc/sound_check.Rda")
 } else{
     load("C:/Users/Martin Vasilev/Documents/DEVS/preproc/sound_check.Rda")
-  }
+}
 
 
 nobs<- nrow(sound_check)
@@ -51,13 +51,12 @@ sound_check<- subset(sound_check, delFix<80)
 - `r (nblinks/nobs)*100` % of data was excluded due to blinks on target words
 - `r (infixn/nobs)*100` % of data was excluded due to late triggering of the sound (command sent after start of fixation)
 - `r (nrow(sound_check)/nobs)*100` % of data remains for analysis 
+- Number of observations per sound condition (overall): Deviant (`r table(sound_check$sound_type)[1]`), Standard (`r table(sound_check$sound_type)[3]`), Silence (`r table(sound_check$sound_type)[2]`)
 
 
 ## Timing of sound:
 
-Time in ms between sending the command to play the sound and the end of the saccade that triggered the sound: Mean: `r round(mean(sound_check$delFix, na.rm=T),1)`. SD: `r round(sd(sound_check$delFix, na.rm=T),1)`. Range: `r range(sound_check$delFix, na.rm=T)`. 
-
-Note that technology doesn't allow absolute time-locking to the onset of fixation. The reason for this is that Eyelink's algorithm for online parsing of fixations requires about 35 ms to obtain enough samples to detect the start of a fixation. Therefore, if you wait for this flag from the system, the fixation would have already started ~ 35 ms ago. This is clearly too much delay for the present study. The best approach (adopted here) is to trigger the sound as soon as the eye crosses the start of the empty space before the word. Usually, this happens towards the end of the saccade. The data above show how many ms passed from triggering the sound to the start of the next fixation. 
+Note that technology doesn't allow absolute time-locking to the onset of fixation. The reason for this is that Eyelink's algorithm for online parsing of fixations requires about 35 ms to obtain enough samples to detect the start of a fixation. Therefore, if you wait for this flag from the system, the fixation would have already started ~ 35 ms ago. This is clearly too much delay for the present study. The best approach (adopted here) is to trigger the sound as soon as the eye crosses the start of the empty space before the word. Usually, this happens towards the end of the saccade.
 
 The sound in this experiment requires 14 ms from sending the 'play' command to the signal coming out from the speakers. Since the command to play the sound is sent several ms before the start of fixation on the target word, this means that participants will usually hear the sound within several ms after the start of fixation. In other words, the latency between the start of fixation on the target word and participants hearing the sound is: 14 ms - time period between sending the command and the start of fixation. The distribution of this latency is shown below:
 
@@ -140,7 +139,7 @@ Dplot2
 ```
 
 
-### Fixation duration measures (on target words):
+### Fixation duration measures (on the target word):
 
 ```{r, echo=FALSE}
 if(office){
@@ -150,23 +149,23 @@ if(office){
 }
 
 
-load_package('reshape')
+library(reshape)
 FD<- subset(FD,!is.na(sound))
 FD$sound<- as.factor(FD$sound)
 #tw<- subset(FD, is.element(word, c(3,5,7,9,11)))
 
 DesFix<- melt(FD, id=c('sub', 'item', 'cond', 'sound'), 
-              measure=c("FFD", "GD", "TVT"), na.rm=TRUE)
+              measure=c("FFD", "SFD", "GD", "TVT"), na.rm=TRUE)
 mFix<- cast(DesFix, sound ~ variable
             , function(x) c(M=signif(mean(x),3)
                             , SD= sd(x) ))
 
 
-load_package("ggplot2")
+library(ggplot2)
 
-db<- data.frame(c(mFix$FFD_M, mFix$GD_M, mFix$TVT_M), c(mFix$FFD_SD, mFix$GD_SD, mFix$TVT_SD),
-                c(rep("FFD",3),  rep("GD",3), rep("TVT",3)), 
-                rep(c("Deviant", "Silence", "Standard"),3))
+db<- data.frame(c(mFix$FFD_M, mFix$SFD_M, mFix$GD_M, mFix$TVT_M), c(mFix$FFD_SD, mFix$SFD_SD, mFix$GD_SD, mFix$TVT_SD),
+                c(rep("FFD",3), rep("SFD",3),  rep("GD",3), rep("TVT",3)), 
+                rep(c("Deviant", "Silence", "Standard"),4))
 
 colnames(db)<- c("Mean", "SD", "Measure", "Sound")
 db$SE<- db$SD/sqrt(length(unique(FD$sub)))
@@ -186,7 +185,7 @@ Dplot<- ggplot(data= db, aes(x=Sound, y= Mean, color=Measure, fill= Measure, gro
   geom_line(size=2)+
   geom_point(size=7)+ 
   xlab("\n Background sound")+ ylab("Mean fixation duration (in ms)")+ 
-  theme(legend.position= c(.11, .85), legend.title=element_text(size=20,
+  theme(legend.position= "bottom", legend.title=element_text(size=20,
         face="bold", family="serif"),
         legend.text=element_text(size=20,family="serif"),legend.key.width=unit(2,"cm"),
         legend.key.height=unit(1,"cm"), strip.text=element_text(size=20, family="serif"),
@@ -195,8 +194,8 @@ Dplot<- ggplot(data= db, aes(x=Sound, y= Mean, color=Measure, fill= Measure, gro
         axis.title.y = element_text(size=20, face="bold", family="serif"), 
         axis.text=element_text(size=20, family="serif"), 
         panel.border = element_rect(linetype = "solid", colour = "black"), 
-        legend.key = element_rect(colour = "#000000", size=1))+
-  geom_ribbon(limits, alpha=0.1, colour=NA)
+        legend.key = element_rect(colour = "#000000", size=1))#+
+  #geom_ribbon(limits, alpha=0.1, colour=NA)
 
 ```
 
@@ -204,66 +203,61 @@ Dplot<- ggplot(data= db, aes(x=Sound, y= Mean, color=Measure, fill= Measure, gro
 Dplot
 
 ```
-FFD: First fixation duration. GD: gaze duration (the sum of all fixations before moving on to another word). TVT: Total viewing time (the sum of all fixations, including the ones made during a regression).
+FFD: First fixation duration. SFD: Single fixation duration (i.e., the word was fixated only once during the trial). GD: gaze duration (the sum of all fixations before moving on to another word). TVT: Total viewing time (the sum of all fixations, including the ones made during a regression).
 
+### Fixation durations on the NEXT word after playing a sound:
 
-### Probability of regression to the target words:
-
-```{r, echo=FALSE}
-#if(office){
-#  load("C:/Users/mvasilev/Documents/DEVS/data/raw_fix.Rda")
-#} else{
-#  load("C:/Users/Martin Vasilev/Documents/DEVS/data/raw_fix.Rda")
-#}
-
-
-#raw_fix<- subset(raw_fix,!is.na(sound))
-#raw_fix$sound<- as.factor(raw_fix$sound)
-
-#DesReg<- melt(raw_fix, id=c('sub', 'item', 'cond', 'sound'), 
-#              measure=c("intrasent_regr"), na.rm=TRUE)
-#mReg<- cast(DesReg, sound ~ variable
-#            , function(x) c(M=signif(mean(x),3)
-#                            , SD= sd(x) ))
-#mReg[,2:3]<- round(mReg[,2:3],2)
-
-#colnames(mReg)<- c('Sound', 'p(Regression)', 'SD')
-#mReg$Sound<- factor(mReg$Sound, levels= c("SLC", "STD", "DEV"))
-#levels(mReg$Sound)<- c('Silence', 'Standard', 'Deviant')
-
-load_package('knitr')
-
-```
-
-r kable(mReg)
-
-
-Greater regression probability is usually associated with difficulty in sentence processing. For example, if word processing was affected somehow when participants heard a noise, they may be more likely to make a regression back to it and re-read it.
-
-### Number of fixations on target region:
-
-The sound manipulation may affect not only the word on which a sound is played, but also the next word (where no sound is played). I use the term 'target region' to refer to these two words together. For example, since we play sounds on the 3rd, 5th, 7th, 9th, and 11th word, the first target region would be word 3 + word 4, the second target region would be word 5 + word 6 and so on. 
-
-```{r, echo=FALSE}
+```{r, echo= FALSE}
 if(office){
-  load("C:/Users/mvasilev/Documents/DEVS/data/FixRG.Rda")
-} else{
-  load("C:/Users/Martin Vasilev/Documents/DEVS/data/FixRG.Rda")
+  load("C:/Users/mvasilev/Documents/DEVS/data/N1.Rda")
+}else{
+  load("C:/Users/Martin Vasilev/Documents/DEVS/data/N1.Rda")
 }
 
-FixRG$sound<- as.factor(FixRG$sound)
+DesN1<- melt(N1, id=c('sub', 'item', 'cond', 'sound'), 
+              measure=c("FFD", "SFD", "GD", "TVT"), na.rm=TRUE)
+mN1<- cast(DesN1, sound ~ variable
+            ,function(x) c(M=signif(mean(x),3)
+                           , SD= sd(x) ))
 
-DesRG<- melt(FixRG, id=c('sub', 'item', 'cond', 'sound'), 
-              measure=c("nfix1", "nfix2", "nfixAll"), na.rm=TRUE)
-mRG<- cast(DesRG, sound ~ variable
-            , function(x) c(M=signif(mean(x),3)
-                            , SD= sd(x) ))
-mRG[,c(3,5,7)]<- round(mRG[,c(3,5,7)],2)
+db<- data.frame(c(mN1$FFD_M, mN1$SFD_M, mN1$GD_M, mN1$TVT_M), c(mN1$FFD_SD, mN1$SFD_SD, mN1$GD_SD, mN1$TVT_SD),
+                c(rep("FFD",3), rep("SFD",3),  rep("GD",3), rep("TVT",3)), 
+                rep(c("Deviant", "Silence", "Standard"),4))
 
-colnames(mRG)<- c('Sound', 'First-pass (mean)', 'First-pass (SD)', 'Second-pass (mean)', 'Second-pass (SD)',
-                  'All (mean)', 'All (SD')
-#mRG$Sound<- factor(mRG$Sound, levels=c("DEV", "STD", "SLC"))
-levels(mRG$Sound)<- c('Standard', 'Deviant', 'Silence')
+colnames(db)<- c("Mean", "SD", "Measure", "Sound")
+db$SE<- db$SD/sqrt(length(unique(N1$sub)))
+
+db$Sound<- factor(db$Sound, levels= c("Silence", "Standard", "Deviant"))
+
+limits <- aes(ymax = db$Mean + db$SE, ymin=db$Mean - db$SE)
+
+Dplot<- ggplot(data= db, aes(x=Sound, y= Mean, color=Measure, fill= Measure, group= Measure, shape= Measure, linetype= Measure))+ 
+  scale_fill_brewer(palette="Dark2")+ 
+  scale_colour_brewer(palette="Dark2")+
+  #scale_fill_manual(values=c(ColorBlind[6:7]))+
+  #scale_colour_manual(values=c(ColorBlind[6:7]))+
+  theme_bw() + theme(panel.grid.major = element_line(colour = "#E3E5E6", size=0.7), 
+                     axis.line = element_line(colour = "black", size=1),
+                     panel.border = element_rect(colour = "black", size=1, fill = NA))+
+  geom_line(size=2)+
+  geom_point(size=7)+ 
+  xlab("\n Background sound")+ ylab("Mean fixation duration (in ms)")+ 
+  theme(legend.position= "bottom", legend.title=element_text(size=20,
+        face="bold", family="serif"),
+        legend.text=element_text(size=20,family="serif"),legend.key.width=unit(2,"cm"),
+        legend.key.height=unit(1,"cm"), strip.text=element_text(size=20, family="serif"),
+        title=element_text(size=20, family="serif"),
+        axis.title.x = element_text(size=20, face="bold", family="serif"),
+        axis.title.y = element_text(size=20, face="bold", family="serif"), 
+        axis.text=element_text(size=20, family="serif"), 
+        panel.border = element_rect(linetype = "solid", colour = "black"), 
+        legend.key = element_rect(colour = "#000000", size=1))#+
+  #geom_ribbon(limits, alpha=0.1, colour=NA)
+
 ```
 
-r kable(mRG)
+```{r, echo=FALSE, fig.height= 7, fig.width=9}
+Dplot
+
+```
+FFD: First fixation duration. SFD: Single fixation duration (i.e., the word was fixated only once during the trial). GD: gaze duration (the sum of all fixations before moving on to another word). TVT: Total viewing time (the sum of all fixations, including the ones made during a regression).
