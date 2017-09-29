@@ -63,13 +63,14 @@ The sound in this experiment requires 14 ms from sending the 'play' command to t
 
 
 ```{r, echo= FALSE}
-hist(sound_check$delFix, xlab= "Sound onset delay (in ms) relative to fixation onset of the target word", main= "Sound implementation timing", family= "serif", col="lightgreen", freq=FALSE, breaks=30, xlim= c(-20, 20)) # , xlim= c(-20, 20)
-abline(v = mean(sound_check$delFix, na.rm=T), col= "darkred", lwd=3)
+hist(sound_check$delFix, xlab= "Sound onset delay (in ms) relative to fixation onset of the target word", main= "Sound implementation timing", family= "serif", col="lightgreen", freq=FALSE, breaks=30, xlim= c(-40, 20)) # , xlim= c(-20, 20)
+m<- subset(sound_check, delFix>-40)
+abline(v = mean(m$delFix, na.rm=T), col= "darkred", lwd=3)
 curve(dnorm(x, mean=mean(sound_check$delFix, na.rm=T), sd=sd(sound_check$delFix, na.rm=T)), add=TRUE, col="darkblue", lwd=2) 
 
 s2<- subset(sound_check, sound_type!="SLC")
 ```
-*Note*: Extreme values due to long saccades are removed from this graph (`r round((length(which(sound_check$delFix< -20))/ nrow(sound_check))*100, 1)` %).
+*Note*: Extreme values due to long saccades are removed from this graph (`r round((length(which(sound_check$delFix< -40))/ nrow(sound_check))*100, 1)` %).
 
 ## Inter-stimulus Interval (ISI):
 
@@ -86,6 +87,59 @@ curve(dnorm(x, mean=mean(s2$ISI-50, na.rm=T), sd=sd(s2$ISI-50, na.rm=T)), add=TR
 
 ## Descriptive statistics:
 
+
+### First two fixations after hearing sound:
+
+```{r, echo= FALSE}
+library(reshape)
+library(ggplot2)
+
+DesFix<- melt(sound_check, id=c('sub', 'item', 'cond', 'sound_type'), 
+                           measure=c("N1", "N2"), na.rm=TRUE)
+mFix<- cast(DesFix, sound_type ~ variable
+                        ,function(x) c(M=signif(mean(x),3)
+                              , SD= sd(x) ))
+db<- data.frame(c(mFix$N1_M, mFix$N2_M), c(mFix$N1_SD, mFix$N2_SD),
+                c(rep("First fixation",3),  rep("Second fixation",3)), 
+                rep(c("Deviant", "Silence", "Standard"),2))
+
+colnames(db)<- c("Mean", "SD", "Measure", "Sound")
+db$SE<- db$SD/sqrt(length(unique(sound_check$sub)))
+db$Sound<- factor(db$Sound, levels= c("Silence", "Standard", "Deviant"))
+
+limits <- aes(ymax = db$Mean + db$SE, ymin=db$Mean - db$SE)
+
+Dplot2<- ggplot(data= db, aes(x=Sound, y= Mean, color=Measure, fill= Measure, group= Measure, shape= Measure, linetype= Measure))+ 
+  scale_fill_brewer(palette="Dark2")+ 
+  scale_colour_brewer(palette="Dark2")+
+  #scale_fill_manual(values=c(ColorBlind[6:7]))+
+  #scale_colour_manual(values=c(ColorBlind[6:7]))+
+  theme_bw() + theme(panel.grid.major = element_line(colour = "#E3E5E6", size=0.7), 
+                     axis.line = element_line(colour = "black", size=1),
+                     panel.border = element_rect(colour = "black", size=1, fill = NA))+
+  geom_line(size=2)+
+  geom_point(size=7)+ 
+  xlab("\n Background sound")+ ylab("Mean fixation duration (in ms)")+ 
+  theme(legend.position= "bottom", legend.title=element_text(size=20,
+        face="bold", family="serif"),
+        legend.text=element_text(size=20,family="serif"),legend.key.width=unit(2,"cm"),
+        legend.key.height=unit(1,"cm"), strip.text=element_text(size=20, family="serif"),
+        title=element_text(size=20, family="serif"),
+        axis.title.x = element_text(size=20, face="bold", family="serif"),
+        axis.title.y = element_text(size=20, face="bold", family="serif"), 
+        axis.text=element_text(size=20, family="serif"), 
+        panel.border = element_rect(linetype = "solid", colour = "black"), 
+        legend.key = element_rect(colour = "#000000", size=1))+
+  geom_ribbon(limits, alpha=0.1, colour=NA)
+
+
+```
+
+```{r, echo=FALSE, fig.height= 7, fig.width=9}
+Dplot2
+```
+
+
 ### Fixation duration measures (on target words):
 
 ```{r, echo=FALSE}
@@ -99,9 +153,9 @@ if(office){
 load_package('reshape')
 FD<- subset(FD,!is.na(sound))
 FD$sound<- as.factor(FD$sound)
-tw<- subset(FD, is.element(word, c(3,5,7,9,11)))
+#tw<- subset(FD, is.element(word, c(3,5,7,9,11)))
 
-DesFix<- melt(tw, id=c('sub', 'item', 'cond', 'sound'), 
+DesFix<- melt(FD, id=c('sub', 'item', 'cond', 'sound'), 
               measure=c("FFD", "GD", "TVT"), na.rm=TRUE)
 mFix<- cast(DesFix, sound ~ variable
             , function(x) c(M=signif(mean(x),3)
@@ -112,7 +166,7 @@ load_package("ggplot2")
 
 db<- data.frame(c(mFix$FFD_M, mFix$GD_M, mFix$TVT_M), c(mFix$FFD_SD, mFix$GD_SD, mFix$TVT_SD),
                 c(rep("FFD",3),  rep("GD",3), rep("TVT",3)), 
-                rep(c("Standard", "Deviant", "Silence"),3))
+                rep(c("Deviant", "Silence", "Standard"),3))
 
 colnames(db)<- c("Mean", "SD", "Measure", "Sound")
 db$SE<- db$SD/sqrt(length(unique(FD$sub)))
@@ -156,32 +210,32 @@ FFD: First fixation duration. GD: gaze duration (the sum of all fixations before
 ### Probability of regression to the target words:
 
 ```{r, echo=FALSE}
-if(office){
-  load("C:/Users/mvasilev/Documents/DEVS/data/raw_fix.Rda")
-} else{
-  load("C:/Users/Martin Vasilev/Documents/DEVS/data/raw_fix.Rda")
-}
+#if(office){
+#  load("C:/Users/mvasilev/Documents/DEVS/data/raw_fix.Rda")
+#} else{
+#  load("C:/Users/Martin Vasilev/Documents/DEVS/data/raw_fix.Rda")
+#}
 
 
-raw_fix<- subset(raw_fix,!is.na(sound))
-raw_fix$sound<- as.factor(raw_fix$sound)
+#raw_fix<- subset(raw_fix,!is.na(sound))
+#raw_fix$sound<- as.factor(raw_fix$sound)
 
-DesReg<- melt(raw_fix, id=c('sub', 'item', 'cond', 'sound'), 
-              measure=c("intrasent_regr"), na.rm=TRUE)
-mReg<- cast(DesReg, sound ~ variable
-            , function(x) c(M=signif(mean(x),3)
-                            , SD= sd(x) ))
-mReg[,2:3]<- round(mReg[,2:3],2)
+#DesReg<- melt(raw_fix, id=c('sub', 'item', 'cond', 'sound'), 
+#              measure=c("intrasent_regr"), na.rm=TRUE)
+#mReg<- cast(DesReg, sound ~ variable
+#            , function(x) c(M=signif(mean(x),3)
+#                            , SD= sd(x) ))
+#mReg[,2:3]<- round(mReg[,2:3],2)
 
-colnames(mReg)<- c('Sound', 'p(Regression)', 'SD')
-mReg$Sound<- factor(mReg$Sound, levels= c("SLC", "STD", "DEV"))
-levels(mReg$Sound)<- c('Silence', 'Standard', 'Deviant')
+#colnames(mReg)<- c('Sound', 'p(Regression)', 'SD')
+#mReg$Sound<- factor(mReg$Sound, levels= c("SLC", "STD", "DEV"))
+#levels(mReg$Sound)<- c('Silence', 'Standard', 'Deviant')
 
 load_package('knitr')
 
 ```
 
-`r kable(mReg)`
+r kable(mReg)
 
 
 Greater regression probability is usually associated with difficulty in sentence processing. For example, if word processing was affected somehow when participants heard a noise, they may be more likely to make a regression back to it and re-read it.
@@ -212,4 +266,4 @@ colnames(mRG)<- c('Sound', 'First-pass (mean)', 'First-pass (SD)', 'Second-pass 
 levels(mRG$Sound)<- c('Standard', 'Deviant', 'Silence')
 ```
 
-`r kable(mRG)`
+r kable(mRG)

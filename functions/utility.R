@@ -490,6 +490,10 @@ parse_fix<- function(file, map, coords, trial_db, i, ResX, ResY, keepLastFix, ha
     
   } # end of j loop
   
+  if(length(outsideText)!= length(item)){
+    outsideText[length(outsideText):length(item)]<- NA
+  }
+  
   raw_fix<- data.frame(sub,item, cond, seq, s_time, e_time,xPos, yPos, fix_num, fix_dur,
                        sent, max_sent, line, word, max_word, char_trial, intrasent_regr, intersent_regr, blink,
                        outOfBnds, outsideText)

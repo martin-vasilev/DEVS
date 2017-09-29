@@ -141,6 +141,9 @@ soundCheck<- function(list_asc = "preproc/files.txt", maxtrial=120, nsounds=5, p
         temp$trialEnd<- get_num(trialF[length(trialF)])
         temp$sound<- k
         temp$sound_type<- soundTypes[k]
+        if(temp$cond==1){
+          temp$sound_type<- "SLC"
+        }
         temp$regionS<- get_regions(regions[k])[1]
         temp$regionE<- get_regions(regions[k])[2]
         
@@ -188,9 +191,13 @@ soundCheck<- function(list_asc = "preproc/files.txt", maxtrial=120, nsounds=5, p
         ####
         # next fixation:
         nextfix<- which(grepl('EFIX', trialF[s:length(trialF)]))
+        nextfix2<- nextfix[2]
         nextfix<- nextfix[1] # always next fix
         nextfix<- trialF[s+nextfix-1]
+        nextfix2<- trialF[s+nextfix2-1]
         temp$nextFix<- as.numeric(unlist(strsplit(nextfix, "\t"))[4])
+        temp$N1<- as.numeric(unlist(strsplit(nextfix, "\t"))[3])
+        temp$N2<- as.numeric(unlist(strsplit(nextfix2, "\t"))[3])
         
         
         #####
