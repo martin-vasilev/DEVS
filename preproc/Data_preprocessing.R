@@ -29,6 +29,8 @@ for(i in 1:nrow(sound_check)){
 }
 
 
+sound_check$Trialt<- sound_check$trialEnd- sound_check$trialStart
+
 # further development:
 # CHANGE DEFINITION OF HOOK!: crossing is not a hook if next fix is within 1 ppl 
 
@@ -181,3 +183,11 @@ DesN1<- melt(N1, id=c('sub', 'item', 'cond', 'sound'),
 mN1<- cast(DesN1, sound ~ variable
             ,function(x) c(M=signif(mean(x),3)
                            , SD= sd(x) ))
+
+### Trial time:
+DesTT<- melt(sound_check, id=c('sub', 'item', 'cond', 'sound_type'), 
+             measure=c("Trialt"), na.rm=TRUE)
+mTT<- cast(DesTT, sound_type ~ variable
+           ,function(x) c(M=signif(mean(x),3)
+                          , SD= sd(x) ))
+

@@ -2,3 +2,9 @@ preproc/raw_data/DEVS1.asc
 preproc/raw_data/DEVS2.asc
 preproc/raw_data/DEVS3.asc
 preproc/raw_data/DEVS4.asc
+preproc/raw_data/DEVS5.asc
+preproc/raw_data/DEVS6.asc
+preproc/raw_data/DEVS7.asc
+preproc/raw_data/DEVS8.asc
+preproc/raw_data/DEVS9.asc
+preproc/raw_data/DEVS10.asc

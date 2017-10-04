@@ -17,7 +17,7 @@ knitr::opts_knit$set(root.dir = getwd())
 
 ```{r, echo= FALSE}
 
-office= T
+office= F
 
 #source("https://raw.githubusercontent.com/martin-vasilev/R_scripts/master/useful_functions.R")
 
@@ -46,6 +46,9 @@ sound_check<- sound_check[-infix,]
 #cat(sprintf("%d percent of data remains for analysis", (nrow(sound_check)/nobs)*100))
 
 sound_check<- subset(sound_check, delFix<80)
+
+sound_check<- subset(sound_check, sub!=5)
+
 ```
 - based on `r length(unique(sound_check$sub))` subjects
 - `r (nblinks/nobs)*100` % of data was excluded due to blinks on target words
@@ -148,6 +151,7 @@ if(office){
   load("C:/Users/Martin Vasilev/Documents/DEVS/data/FD.Rda")
 }
 
+FD<- subset(FD, sub!=5)
 
 library(reshape)
 FD<- subset(FD,!is.na(sound))
@@ -214,6 +218,8 @@ if(office){
   load("C:/Users/Martin Vasilev/Documents/DEVS/data/N1.Rda")
 }
 
+N1<- subset(N1, sub!=5)
+
 DesN1<- melt(N1, id=c('sub', 'item', 'cond', 'sound'), 
               measure=c("FFD", "SFD", "GD", "TVT"), na.rm=TRUE)
 mN1<- cast(DesN1, sound ~ variable
@@ -253,7 +259,6 @@ Dplot<- ggplot(data= db, aes(x=Sound, y= Mean, color=Measure, fill= Measure, gro
         panel.border = element_rect(linetype = "solid", colour = "black"), 
         legend.key = element_rect(colour = "#000000", size=1))#+
   #geom_ribbon(limits, alpha=0.1, colour=NA)
-
 ```
 
 ```{r, echo=FALSE, fig.height= 7, fig.width=9}

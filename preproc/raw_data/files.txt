@@ -2,3 +2,6 @@ DEVS1.asc
 DEVS2.asc
 DEVS3.asc
 DEVS4.asc
+DEVS5.asc
+DEVS6.asc
+DEVS7.asc
