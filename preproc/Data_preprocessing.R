@@ -125,6 +125,34 @@ save(FD, file='data/FD.Rda')
 save(N1, file='data/N1.Rda')
 
 
+raw_fix$keep<- 0
+raw_fix$keepN1<- 0
+
+for(i in 1:nrow(raw_fix)){
+  a<- which(sound_check$sub== raw_fix$sub[i] & sound_check$item== raw_fix$item[i] & sound_check$word== raw_fix$word[i])
+  
+  if(length(a)>0){
+    raw_fix$keep[i]<- 1
+    raw_fix$sound[i]<- sound_check$sound_type[a]
+    
+    b<- which(raw_fix$item== raw_fix$item[i] & raw_fix$sub== raw_fix$sub[i] & raw_fix$word== raw_fix$word[i]+1)
+    if(length(b>0)){
+      raw_fix$keepN1[b]<- 1
+      raw_fix$sound[b]<- sound_check$sound_type[a]
+    }
+    
+  }
+}
+
+TWraw<- subset(raw_fix, keep==1)
+source("functions/nFix.R")
+FixN<- nFix(TWraw)
+save(FixN, file= "data/FixN.Rda")
+
+TWrawN1<- subset(raw_fix, keepN1==1)
+FixN1<- nFix(TWrawN1)
+save(FixN1, file= "data/FixN1.Rda")
+
 #FD$keep<- 0
 
 #for(i in 1:nrow(FD)){

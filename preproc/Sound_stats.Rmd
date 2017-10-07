@@ -17,7 +17,7 @@ knitr::opts_knit$set(root.dir = getwd())
 
 ```{r, echo= FALSE}
 
-office= F
+office= T
 
 #source("https://raw.githubusercontent.com/martin-vasilev/R_scripts/master/useful_functions.R")
 
@@ -209,7 +209,7 @@ Dplot
 ```
 FFD: First fixation duration. SFD: Single fixation duration (i.e., the word was fixated only once during the trial). GD: gaze duration (the sum of all fixations before moving on to another word). TVT: Total viewing time (the sum of all fixations, including the ones made during a regression).
 
-### Fixation durations on the NEXT word after playing a sound:
+### Fixation durations on the NEXT word in the sentence after playing a sound:
 
 ```{r, echo= FALSE}
 if(office){
@@ -266,3 +266,55 @@ Dplot
 
 ```
 FFD: First fixation duration. SFD: Single fixation duration (i.e., the word was fixated only once during the trial). GD: gaze duration (the sum of all fixations before moving on to another word). TVT: Total viewing time (the sum of all fixations, including the ones made during a regression).
+
+### Number of fixations:
+
+First-pass fixations are made during the initial reading of the word (they count towards GD). Second-pass fixations are those made during regressions to the word. When the two types of fixations are combined, they count towards TVT (i.e., the difference from GD is that we also add the second-pass fixations in TVT).
+
+```{r, echo= FALSE}
+if(office){
+  load("C:/Users/mvasilev/Documents/DEVS/data/FixN.Rda")
+  load("C:/Users/mvasilev/Documents/DEVS/data/FixN1.Rda")
+}else{
+  load("C:/Users/Martin Vasilev/Documents/DEVS/data/FixN.Rda")
+  load("C:/Users/Martin Vasilev/Documents/DEVS/data/FixN1.Rda")
+}
+
+FixN<- subset(FixN, sub!=5)
+FixN1<- subset(FixN1, sub!=5)
+
+DesFixN<- melt(FixN, id=c('sub', 'item', 'cond', 'sound'), 
+              measure=c("nfix1", "nfix2", "nfixAll"), na.rm=TRUE)
+mFixN<- cast(DesFixN, sound ~ variable
+            , function(x) c(M=signif(mean(x),3)
+                            , SD= sd(x) ))
+
+DesFixN1<- melt(FixN1, id=c('sub', 'item', 'cond', 'sound'), 
+              measure=c("nfix1", "nfix2", "nfixAll"), na.rm=TRUE)
+mFixN1<- cast(DesFixN1, sound ~ variable
+            , function(x) c(M=signif(mean(x),3)
+                            , SD= sd(x) ))
+mFixN[,2:7]<- round(mFixN[,2:7],2)
+mFixN1[,2:7]<- round(mFixN1[,2:7],2)
+
+colnames(mFixN)<- c("Sound", "1st-pass (M)", "1st-pass (SD)", "2nd-pass (M)", "2nd-pass (SD)",
+                    "All (M)", "All (SD)")
+
+colnames(mFixN1)<- c("Sound", "1st-pass (M)", "1st-pass (SD)", "2nd-pass (M)", "2nd-pass (SD)",
+                    "All (M)", "All (SD)")
+mFixN$Sound<-  c("Silence", "Standard", "Deviant")
+mFixN1$Sound<-  c("Silence", "Standard", "Deviant")
+#levels(mFixN$sound)<- c("Silence", "Standard", "Deviant")
+#levels(mFixN1$sound)<- c("Silence", "Standard", "Deviant")
+
+library(knitr)
+```
+
+
+_On the target word:_
+
+`r kable(mFixN)`
+
+_On the next word in the sentence:_
+
+`r kable(mFixN1)`
