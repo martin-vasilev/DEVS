@@ -47,7 +47,7 @@ sound_check<- sound_check[-infix,]
 
 sound_check<- subset(sound_check, delFix<80)
 
-sound_check<- subset(sound_check, sub!=5)
+#sound_check<- subset(sound_check, sub!=5)
 
 ```
 - based on `r length(unique(sound_check$sub))` subjects
@@ -151,7 +151,7 @@ if(office){
   load("C:/Users/Martin Vasilev/Documents/DEVS/data/FD.Rda")
 }
 
-FD<- subset(FD, sub!=5)
+#FD<- subset(FD, sub!=5)
 
 library(reshape)
 FD<- subset(FD,!is.na(sound))
@@ -218,7 +218,7 @@ if(office){
   load("C:/Users/Martin Vasilev/Documents/DEVS/data/N1.Rda")
 }
 
-N1<- subset(N1, sub!=5)
+#N1<- subset(N1, sub!=5)
 
 DesN1<- melt(N1, id=c('sub', 'item', 'cond', 'sound'), 
               measure=c("FFD", "SFD", "GD", "TVT"), na.rm=TRUE)
@@ -280,8 +280,8 @@ if(office){
   load("C:/Users/Martin Vasilev/Documents/DEVS/data/FixN1.Rda")
 }
 
-FixN<- subset(FixN, sub!=5)
-FixN1<- subset(FixN1, sub!=5)
+#FixN<- subset(FixN, sub!=5)
+#FixN1<- subset(FixN1, sub!=5)
 
 DesFixN<- melt(FixN, id=c('sub', 'item', 'cond', 'sound'), 
               measure=c("nfix1", "nfix2", "nfixAll"), na.rm=TRUE)

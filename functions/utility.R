@@ -244,28 +244,27 @@ trial_info<- function(file, maxtrial, data){ # extracts information for processi
   duplicated<- trials[duplicated(trials)]
   
   if(length(duplicated)>0){ # if there were aborted trials..
-    message(paste(" Diplicated trial", duplicated, "for file:", data, "\n"))
-    message("Analysing only last attempt at the trial!")
+    # message(paste(" Diplicated trial", duplicated, "for file:", data, "\n"))
+    # message("Analysing only last attempt at the trial!")
     
     toBeRemoved<- NULL
+    uniqueDupl<- unique(duplicated)
+    dup_rem<- NULL
     
-    for(i in 1:length(duplicated)){
-      dup_rem<- which(trials==duplicated[i])
+    for(i in 1:length(uniqueDupl)){
+      dup_rem_T<- which(trials==uniqueDupl[i])
+      dup_rem<- c(dup_rem, dup_rem_T[1:length(dup_rem_T)-1])
       
-      for(j in 1:length(dup_rem)){
-        if(j!=length(dup_rem)){
-          toBeRemoved[length(toBeRemoved)+1]= dup_rem[j]
-        }
-      } # end of j
+      
     } # end of i
     
-    #start<- start[-toBeRemoved]
-    # end<- end[-toBeRemoved]
-    cond<- cond[-toBeRemoved]
-    item<- item[-toBeRemoved]
+    start<- start[-dup_rem]
+    #end<- end[-dup_rem]
+    cond<- cond[-dup_rem]
+    item<- item[-dup_rem]
     # seq<- seq[-toBeRemoved]
-    depend<- depend[-toBeRemoved]
-    ID<- ID[-toBeRemoved]
+    depend<- depend[-dup_rem]
+    ID<- ID[-dup_rem]
   } # end of aborted conditional
   
   trial_db<- data.frame(cond, item, depend, start, end, ID)
@@ -391,6 +390,9 @@ parse_fix<- function(file, map, coords, trial_db, i, ResX, ResY, keepLastFix, ha
     
     if(hasText){
       loc<- map[fix$y[j], fix$x[j]] # locate fixation
+      if(is.list(loc)){
+        loc<- NULL
+      }
     }
     
     # general info:
