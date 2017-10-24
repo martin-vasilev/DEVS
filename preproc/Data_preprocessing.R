@@ -189,7 +189,7 @@ mFix<- cast(DesFix, sound_type ~ variable
 
 DesFix<- melt(TW, id=c('sub', 'item', 'cond', 'sound'), 
               measure=c("FFD", "GD", "TVT"), na.rm=TRUE)
-mTW<- cast(DesFix, sound ~ variable
+mTW<- cast(DesFix, sound+sub ~ variable
             ,function(x) c(M=signif(mean(x),3)
                            , SD= sd(x) ))
 
@@ -219,3 +219,30 @@ mTT<- cast(DesTT, sound_type ~ variable
            ,function(x) c(M=signif(mean(x),3)
                           , SD= sd(x) ))
 
+
+### Total nFix:
+
+
+####
+FD$sound<- as.factor(FD$sound)
+FD$sound<- factor(FD$sound, levels= c("STD", "DEV", "SLC"))
+contrasts(FD$sound)
+
+library(lme4)
+
+summary(lmer(log(FFD) ~ sound + word + (sound|sub)+ (sound|item) , data=FD, REML=T))
+summary(lmer(log(SFD) ~ sound + word+ (sound|sub)+ (1|item), data=FD, REML=T))
+summary(lmer(log(GD) ~ sound+ (sound|sub)+ (1|item), data=FD, REML=T))
+summary(lmer(log(TVT) ~ sound + (sound|sub)+ (1|item), data=FD, REML=T))
+
+
+###
+sound_check$sound_type<- as.factor(sound_check$sound_type)
+sound_check$sound_type<- factor(sound_check$sound_type, levels= c("STD", "DEV", "SLC"))
+contrasts(sound_check$sound_type)
+
+summary(lmer(N1len ~ sound_type + (sound_type|sub)+ (1|item), data=sound_check, REML=T))
+summary(lmer(N2len ~ sound_type + (sound_type|sub)+ (1|item), data=sound_check, REML=T))
+
+summary(lmer(N1 ~ sound_type + (sound|sub)+ (1|item), data=sound_check, REML=T))
+summary(lmer(N2 ~ sound_type + (sound|sub)+ (1|item), data=sound_check, REML=T))
