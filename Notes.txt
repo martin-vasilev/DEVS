@@ -1,1 +1,0 @@
-- make sure the correct boundaries are printed on the Eyelink screen
