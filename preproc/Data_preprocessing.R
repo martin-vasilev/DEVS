@@ -55,13 +55,18 @@ infix<- which(sound_check$delFix>14)
 infixn<- length(infix)
 sound_check<- sound_check[-infix,]
 
+nhook<- nrow(sound_check)
+sound_check<- subset(sound_check, hook=="No")
+nhook<- ((nrow(sound_check)-nhook)/nobs)*100
+
 cat(sprintf("%f percent of data excluded due to blinks", (nblinks/nobs)*100))
 cat(sprintf("%f percent of data excluded due to in-fixations", (infixn/nobs)*100))
+cat(sprintf("%f percent of data excluded due to hooks", abs(nhook)))
 cat(sprintf("%f percent of data remains for analysis", (nrow(sound_check)/nobs)*100))
 
 #sound_check<- subset(sound_check, delFix<80)
 
-
+save(sound_check, file= "data/sound_check.Rda")
 ###############################
 #   Pre-process fixations:    #
 ###############################
@@ -92,7 +97,8 @@ source("functions/reading_times.R")
 FD<- reading_measures(raw_fix)
 #FD<- reading_measures(MF)
 
-out<- which(FD$FFD>800 | FD$GD>2000 | FD$TVT>3000)
+out<- which(FD$FFD>800 | FD$GD>2000 | FD$TVT>4000)
+a<- FD[out,]
 
 if(length(out)>0){
   FD<- FD[-out,]
@@ -187,9 +193,9 @@ mFix<- cast(DesFix, sound_type ~ variable
 
 
 
-DesFix<- melt(TW, id=c('sub', 'item', 'cond', 'sound'), 
-              measure=c("FFD", "GD", "TVT"), na.rm=TRUE)
-mTW<- cast(DesFix, sound+sub ~ variable
+DesFix<- melt(TW, id=c('sub', 'item', 'cond', 'sound', 'word'), 
+              measure=c("FFD", "SFD", "GD", "TVT"), na.rm=TRUE)
+mTW<- cast(DesFix, sound ~ variable
             ,function(x) c(M=signif(mean(x),3)
                            , SD= sd(x) ))
 
@@ -221,6 +227,13 @@ mTT<- cast(DesTT, sound_type ~ variable
 
 
 ### Total nFix:
+GenFix<- nFix(raw_fix)
+
+DesGen<- melt(GenFix, id=c('sub', 'item', 'cond'), 
+              measure=c("nfix1", "nfix2", "nfixAll"), na.rm=TRUE)
+mGen<- cast(DesGen, cond ~ variable
+            ,function(x) c(M=signif(mean(x),3)
+                           , SD= sd(x) ))
 
 
 ####
@@ -230,11 +243,21 @@ contrasts(FD$sound)
 
 library(lme4)
 
-summary(lmer(log(FFD) ~ sound + word + (sound|sub)+ (sound|item) , data=FD, REML=T))
-summary(lmer(log(SFD) ~ sound + word+ (sound|sub)+ (1|item), data=FD, REML=T))
-summary(lmer(log(GD) ~ sound+ (sound|sub)+ (1|item), data=FD, REML=T))
-summary(lmer(log(TVT) ~ sound + (sound|sub)+ (1|item), data=FD, REML=T))
+summary(lmer(log(FFD) ~ sound +  (sound|sub)+ (1|item) , data=FD, REML=T))
+summary(lmer(log(SFD) ~ sound +  (sound|sub)+ (1|item), data=FD, REML=T))
+summary(lmer(log(GD) ~ sound+ (sound|sub)+ (sound|item), data=FD, REML=T))
+summary(lmer(log(TVT) ~ sound +  (sound|sub)+ (sound|item), data=FD, REML=T))
 
+########################
+
+N1$sound<- as.factor(N1$sound)
+N1$sound<- factor(N1$sound, levels= c("STD", "DEV", "SLC"))
+contrasts(N1$sound)
+
+summary(lmer(log(FFD) ~ sound + (sound|sub)+ (sound|item) , data=N1, REML=T))
+summary(lmer(log(SFD) ~ sound + (sound|sub)+ (sound|item) , data=N1, REML=T))
+summary(lmer(log(GD) ~ sound+ (sound|sub)+ (sound|item), data=N1, REML=T))
+summary(lmer(log(TVT) ~ sound + (1|sub)+ (1|item), data=N1, REML=T))
 
 ###
 sound_check$sound_type<- as.factor(sound_check$sound_type)
@@ -244,5 +267,7 @@ contrasts(sound_check$sound_type)
 summary(lmer(N1len ~ sound_type + (sound_type|sub)+ (1|item), data=sound_check, REML=T))
 summary(lmer(N2len ~ sound_type + (sound_type|sub)+ (1|item), data=sound_check, REML=T))
 
-summary(lmer(N1 ~ sound_type + (sound|sub)+ (1|item), data=sound_check, REML=T))
-summary(lmer(N2 ~ sound_type + (sound|sub)+ (1|item), data=sound_check, REML=T))
+summary(lmer(log(N1) ~ sound_type + (sound_type|sub)+ (sound_type|item), data=sound_check, REML=T))
+summary(lmer(log(N2) ~ sound_type + (sound_type|sub)+ (sound_type|item), data=sound_check, REML=T))
+
+summary(glmer(N1reg ~ sound_type +sound:sound_type+ (sound_type|sub)+ (1|item), data=sound_check, family= binomial))
