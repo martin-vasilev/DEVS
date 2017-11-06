@@ -93,6 +93,7 @@ save(raw_fix, file= "data/raw_fix.Rda")
 #MF<- map_by_pos(raw_fix)
 
 raw_fix$sound<- NA
+
 source("functions/reading_times.R")
 FD<- reading_measures(raw_fix)
 #FD<- reading_measures(MF)
