@@ -221,3 +221,41 @@ DesSacc<- melt(raw_fix, id=c('sub', 'item', 'cond'),
 mSacc<- cast(DesSacc, cond ~ variable
             ,function(x) c(M=signif(mean(x),3)
                            , SD= sd(x) ))
+
+
+
+###### lexical frequency:
+library(readr)
+freq <- read_delim("C:/Users/mvasilev/Documents/DEVS/freq.txt", 
+                  "\t", escape_double = FALSE, trim_ws = TRUE)
+
+FD$Zipf<- NULL
+FD$freq<- NULL
+
+for(i in 1:nrow(FD)){
+  a<- which(freq$item== FD$item[i] & freq$word== FD$word[i])
+  FD$Zipf[i]<- freq$Zipf[a]
+  FD$freq[i]<- freq$Freq_mil[a]
+}
+
+FD$freq<- log10(FD$freq)
+
+summary(freqFFD<-lmer(log(FFD) ~  freq+ freq:sound+ (freq+sound|sub)+ (freq|item), data=FD, REML=T))
+summary(freqSFD<-lmer(log(SFD) ~ freq+ freq:sound+ (freq+sound|sub)+ (freq|item), data=FD, REML=T))
+summary(freqGD<- lmer(log(GD) ~  freq+ freq:sound+ (freq+sound|sub)+ (freq|item), data=FD, REML=T))
+summary(freqTVT<-lmer(log(TVT) ~ freq+ freq:sound+ (freq|sub)+ (freq|item), data=FD, REML=T))
+
+library(effects)
+
+
+plot(effect(c('freq:sound'),freqFFD), family='serif', main= "Lexical frequency x Sound [FFD]", 
+     xlab= "log(Lexical frequency)", cex = 2.4)
+
+plot(effect(c('freq:sound'),freqSFD), family='serif', main= "Lexical frequency x Sound [SFD]", 
+     xlab= "log(Lexical frequency)")
+
+plot(effect(c('freq:sound'),freqGD), family='serif', main= "Lexical frequency x Sound [SFD]", 
+     xlab= "log(Lexical frequency)")
+
+plot(effect(c('freq:sound'),freqTVT), family='serif', main= "Lexical frequency x Sound [SFD]", 
+     xlab= "log(Lexical frequency)")
