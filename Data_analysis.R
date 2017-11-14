@@ -210,9 +210,9 @@ for (i in 1:nrow(raw_fix)){
   if(i>1){
     if(raw_fix$item[i]==raw_fix$item[i-1]){
       raw_fix$sacc_len[i]<- abs((raw_fix$xPos[i]-raw_fix$xPos[i-1])/14)
-    }
-  }else{
+    } else{
     raw_fix$sacc_len[i]<-NA 
+   } 
   }
 }
 
@@ -222,6 +222,74 @@ mSacc<- cast(DesSacc, cond ~ variable
             ,function(x) c(M=signif(mean(x),3)
                            , SD= sd(x) ))
 
+
+
+# LMMs: Global reading:
+raw_fix$sound<- NULL
+
+for(i in 1:nrow(raw_fix)){
+  if(raw_fix$cond[i]=="1"){
+    raw_fix$sound[i]<- "SLC"
+  }
+  if(raw_fix$cond[i]=="2"){
+    raw_fix$sound[i]<- "STD"
+  }
+  if(raw_fix$cond[i]=="3"){
+    raw_fix$sound[i]<- "DEV"
+  }
+}
+
+library(lme4)
+raw_fix$sound<- as.factor(raw_fix$sound)
+raw_fix$sound<- factor(raw_fix$sound, levels= c("STD", "DEV", "SLC"))
+contrasts(raw_fix$sound)
+
+# fixation duration:
+# does not converge with slope for items
+summary(mFD<-lmer(log(fix_dur) ~ sound +  (sound|sub)+ (1|item), data=raw_fix, REML=T))
+
+# saccade length:
+# does not converge with random slopes
+summary(mSL<-lmer(log(sacc_len) ~ sound +  (1|sub)+ (1|item), data=raw_fix, REML=T))
+
+
+# Sentence reading time:
+SRT$sound<- NULL
+for(i in 1:nrow(SRT)){
+  if(SRT$cond[i]=="1"){
+    SRT$sound[i]<- "SLC"
+  }
+  if(SRT$cond[i]=="2"){
+    SRT$sound[i]<- "STD"
+  }
+  if(SRT$cond[i]=="3"){
+    SRT$sound[i]<- "DEV"
+  }
+}
+
+summary(mRT<-lmer(log(fix_dur) ~ sound +  (sound|sub)+ (1|item), data=SRT, REML=T))
+
+
+# number of fixations:
+GenFix$sound<- NULL
+for(i in 1:nrow(GenFix)){
+  if(GenFix$cond[i]=="1"){
+    GenFix$sound[i]<- "SLC"
+  }
+  if(GenFix$cond[i]=="2"){
+    GenFix$sound[i]<- "STD"
+  }
+  if(GenFix$cond[i]=="3"){
+    GenFix$sound[i]<- "DEV"
+  }
+}
+
+GenFix$sound<- as.factor(GenFix$sound)
+GenFix$sound<- factor(GenFix$sound, levels= c("STD", "DEV", "SLC"))
+contrasts(GenFix$sound)
+
+summary(mGEN<-glmer(nfixAll ~  sound+ (0+sound||sub)+ (1|item),
+                      data=GenFix, family= poisson))
 
 
 ###### lexical frequency:
