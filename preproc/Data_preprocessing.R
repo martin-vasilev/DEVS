@@ -87,7 +87,6 @@ source("functions/less80.R")
 raw_fix<- less80(raw_fix)
 l80<- which(raw_fix$fix_dur<80)
 raw_fix<- raw_fix[-l80,]
-save(raw_fix, file= "data/raw_fix.Rda")
 
 #source('functions/map_by_pos.R')
 #MF<- map_by_pos(raw_fix)
@@ -132,6 +131,7 @@ save(FD, file='data/FD.Rda')
 save(N1, file='data/N1.Rda')
 
 
+
 raw_fix$keep<- 0
 raw_fix$keepN1<- 0
 
@@ -150,6 +150,8 @@ for(i in 1:nrow(raw_fix)){
     
   }
 }
+
+save(raw_fix, file= "data/raw_fix.Rda")
 
 TWraw<- subset(raw_fix, keep==1)
 source("functions/nFix.R")

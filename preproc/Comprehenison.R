@@ -36,3 +36,5 @@ sd(P$age, na.rm=T)
 range(P$age, na.rm=T)
 
 (1-table(P$gender)[2]/nrow(P))*100
+
+

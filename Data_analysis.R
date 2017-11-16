@@ -145,8 +145,73 @@ summary(mFFD<-lmer(log(FFD) ~ sound +  (sound||sub)+ (1|item) , data=FD, REML=T)
 summary(mGD<-lmer(log(GD) ~ sound+ (sound|sub)+ (sound|item), data=FD, REML=T))
 summary(mTVT<-lmer(log(TVT) ~ sound +  (sound|sub)+ (sound|item), data=FD, REML=T))
 
-######### Next saccade:
+###################
 
+FD2<- FD
+
+FD2$GD2<- FD2$GD- FD2$FFD +0.01
+FD2$TVT2<- FD2$TVT- FD2$GD+0.01
+
+summary(mGD2<-lmer(log(GD2) ~ sound+ (sound|sub)+ (sound|item), data=FD2, REML=T))
+summary(mTVT2<-lmer(log(TVT2) ~ sound+ (sound|sub)+ (sound|item), data=FD2, REML=T))
+
+# Fixations counting towards GD and TVT are not statistically significant on their own
+# 
+
+
+
+########
+# Skipping probability on the next word:
+
+sub<- NULL
+item<- NULL
+skip<- NULL
+cond<- NULL
+sound<- NULL
+word<- NULL
+
+for (i in 1:nrow(sound_check)){
+  a<- subset(raw_fix, sub== sound_check$sub[i] & item== sound_check$item[i] & word== sound_check$word[i]+1)
+  n<- subset(a, intrasent_regr==0)
+  
+  if(nrow(n)>0){
+    skip[i]<- 0
+  } else{
+    skip[i]<- 1
+  }
+  
+  sub[i]<- sound_check$sub[i]
+  item[i]<- sound_check$item[i]
+  cond[i]<- sound_check$cond[i]
+  sound[i]<- sound_check$sound_type[i]
+  word[i]<- sound_check$word[i]+1
+}
+
+FX<- data.frame(sub, item, cond, sound, word, skip)
+
+FX$pos<- NULL
+for(i in 1:nrow(FX)){
+  FX$pos[i]
+}
+
+
+save(FX, file= "data/FX.Rda")
+
+
+DesSkip<- melt(FX, id=c('sub', 'item', 'cond', 'sound', 'word'), 
+              measure=c("skip"), na.rm=TRUE)
+mSkip<- cast(DesSkip, sound ~ variable
+            ,function(x) c(M=signif(mean(x),3)
+                           , SD= sd(x) ))
+
+FX$sound<- as.factor(FX$sound)
+FX$sound<- factor(FX$sound, levels= c("STD", "DEV", "SLC"))
+contrasts(FX$sound)
+
+summary(glmer(skip ~ sound + (1|sub)+ (1|item), data=FX, family= binomial))
+
+
+######### Next saccade:
 DesReg<- melt(sound_check, id=c('sub', 'item', 'cond', 'sound_type'), 
               measure=c("N1reg", "N2reg"), na.rm=TRUE)
 mReg<- cast(DesReg, sound_type ~ variable
