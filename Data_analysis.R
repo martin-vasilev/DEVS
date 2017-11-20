@@ -224,6 +224,24 @@ contrasts(sound_check$sound_type)
 
 summary(glmer(N1reg ~ sound_type + (sound_type|sub)+ (1|item), data=sound_check, family= binomial))
 
+
+### Where do they land after regression?
+
+R<- subset(sound_check, N1reg==1)
+R$sacc_len<-  (R$nextFix- R$N1x)/14
+R$prevWords<- NULL
+
+for(i in 1:nrow(R)){
+  if(!is.na(R$N1x[i])){
+    if(R$N1x[i]< R$regionS[i]){
+      R$prevWords[i]<- 1
+    } else{
+      R$prevWords[i]<- 0
+    }
+  }
+
+}
+
 ############### length:
 
 DesLen<- melt(sound_check, id=c('sub', 'item', 'cond', 'sound_type'), 
