@@ -279,6 +279,8 @@ mFix<- cast(DesFix, cond ~ variable
 source("functions/nFix.R")
 GenFix<- nFix(raw_fix)
 
+GenFix<- subset(GenFix, nfixAll<60)
+
 DesGen<- melt(GenFix, id=c('sub', 'item', 'cond'), 
               measure=c("nfix1", "nfix2", "nfixAll"), na.rm=TRUE)
 mGen<- cast(DesGen, cond ~ variable
@@ -287,7 +289,7 @@ mGen<- cast(DesGen, cond ~ variable
 
 # saccade length:
 
-raw_fix$sacc_len<- NULL
+raw_fix$sacc_len<- NA
 
 for (i in 1:nrow(raw_fix)){
   if(i>1){
@@ -350,7 +352,11 @@ for(i in 1:nrow(SRT)){
   }
 }
 
-summary(mRT<-lmer(log(fix_dur) ~ sound +  (sound|sub)+ (1|item), data=SRT, REML=T))
+SRT$sound<- as.factor(SRT$sound)
+SRT$sound<- factor(SRT$sound, levels= c("STD", "DEV", "SLC"))
+contrasts(SRT$sound)
+
+summary(mRT<-lmer(log(fix_dur) ~ sound + (0+sound|sub)+ (1|item), data=SRT, REML=T))
 
 
 # number of fixations:
@@ -371,14 +377,13 @@ GenFix$sound<- as.factor(GenFix$sound)
 GenFix$sound<- factor(GenFix$sound, levels= c("STD", "DEV", "SLC"))
 contrasts(GenFix$sound)
 
-summary(mGEN<-glmer(nfixAll ~  sound+ (0+sound||sub)+ (1|item),
-                      data=GenFix, family= poisson))
+summary(mGEN<-lmer(nfixAll ~  sound+ (0+sound|sub)+ (1|item),
+                      data=GenFix, REML=F))
 
 
 ###### lexical frequency:
 library(readr)
-freq <- read_delim("C:/Users/mvasilev/Documents/DEVS/freq.txt", 
-                  "\t", escape_double = FALSE, trim_ws = TRUE)
+freq <- read_delim("freq.txt", "\t", escape_double = FALSE, trim_ws = TRUE)
 
 FD$Zipf<- NULL
 FD$freq<- NULL
@@ -391,10 +396,14 @@ for(i in 1:nrow(FD)){
 
 FD$freq<- log10(FD$freq)
 
-summary(freqFFD<-lmer(log(FFD) ~  freq+ freq:sound+ (freq+sound|sub)+ (freq|item), data=FD, REML=T))
-summary(freqSFD<-lmer(log(SFD) ~ freq+ freq:sound+ (freq+sound|sub)+ (freq|item), data=FD, REML=T))
-summary(freqGD<- lmer(log(GD) ~  freq+ freq:sound+ (freq+sound|sub)+ (freq|item), data=FD, REML=T))
-summary(freqTVT<-lmer(log(TVT) ~ freq+ freq:sound+ (freq|sub)+ (freq|item), data=FD, REML=T))
+summary(freqFFD<-lmer(log(FFD) ~  freq+ sound+ freq:sound+ (freq+sound|sub)+ (freq|item),
+                      data=FD, REML=T))
+summary(freqSFD<-lmer(log(SFD) ~ freq+ freq:sound+ (freq+sound|sub)+ (freq|item),
+                      data=FD, REML=T))
+summary(freqGD<- lmer(log(GD) ~  freq+ freq:sound+ (freq+sound|sub)+ (freq|item),
+                      data=FD, REML=T))
+summary(freqTVT<-lmer(log(TVT) ~ freq+ freq:sound+ (freq|sub)+ (freq|item),
+                      data=FD, REML=T))
 
 library(effects)
 
