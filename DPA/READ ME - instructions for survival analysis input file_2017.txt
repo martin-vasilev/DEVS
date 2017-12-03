@@ -1,0 +1,40 @@
+﻿November 4, 2016
+
+Instructions:
+
+The folder contains four different survival analysis scripts, which include the previous three techniques described by Reingold and Sheridan, in Frontiers in Psychology (http://dx.doi.org/10.3389/fpsyg.2014.01432)
+:
+1. Original DPA Procedure ("survival_original_DPA_Nov2016_Appendix")
+2. Confidence Interval DPA procedure ("survival_CI_DPA_Nov2016_Appendix")
+3. Individual Participant DPA procedure ("survival_IP_DPA_Nov2016_Appendix")
+
+The fourth script corresponds to the technique introduced by Reingold and Sheridan in the current manuscript (Quarterly Journal of Experimental Psychology):
+4. Ex-Gaussian survival procedure ("survival_ExGaussian_Nov2016_Appendix")
+Note: The fourth script requires the ex-Gaussian fitting toolbox provided by Lacouture Y. & Cousineau D. (2008). How to use MATLAB to fit the ex-Gaussian and other probability functions to a distribution of response times. 
+Tutorials in Quantitative Methods for Psychology, Vol. 4 (1), p. 35‐45. 
+Here is a link to download this toolbox: http://www.psy.ulaval.ca/?pid=1529
+
+
+Input Instructions: The input data file must be a .txt file (Tab Delimited).
+The first three scripts (i.e., Original DPA Procedure, Confidence Interval DPA procedure, and Individual Participant DPA procedure) require an input file with three columns:
+subject - participant number (the data must be organised in ascending order of participant, starting with 1)
+duration - the duration of the fixation, in ms
+condition - 1 = fast condition; 2 = slow condition
+
+Note: For the above input file, Each row represents a single trial or fixation duration in the experiment. Please see the sample data file for an example (“Scripts_1_to_3_DPA_Sample_Data.txt”)
+
+The fourth script (i.e., Ex-Gaussian survival procedure) requires an input file with 7 columns:
+subject - participant number (the data must be organised in ascending order of participant, starting with 1)
+mu_1 - mu parameter corresponding to the fast condition
+sigma_1 - sigma parameter corresponding to the fast condition
+tau_1 - tau parameter corresponding to the fast condition
+mu_2 - mu parameter corresponding to the slow condition
+sigma_2 - sigma parameter corresponding to the slow condition
+tau_2 - tau parameter corresponding to the slow condition
+Note: For the above input file, Each row represents the ex-Gaussian parameters from a single participant. Please see the sample data file for an example ("Script_4_DPA_Sample_Data.txt”)
+
+Sample input files: To illustrate the format of these two input files, the folder contains two sample input files: "Scripts_1_to_3_DPA_Sample_Data.txt", which correponds to the input file for the first three scripts, and "Script_4_DPA_Sample_Data.txt", which corresponds to the input file for the fourth script.
+
+Output Instructions: The Original DPA Procedure will output the results to the command window, and the Confidence Interval DPA procedure will output the results to both the command window and a text file. The remaining two scripts (Individual Participant DPA procedure and Ex-Gaussian survival procedure) will output the results to a text file.
+
+If you have any questions about the scripts, please contact Heather Sheridan (hsheridan@albany.edu)

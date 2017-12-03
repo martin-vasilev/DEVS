@@ -162,6 +162,25 @@ TWrawN1<- subset(raw_fix, keepN1==1)
 FixN1<- nFix(TWrawN1)
 save(FixN1, file= "data/FixN1.Rda")
 
+
+###### DPA data frame:
+
+load("data/FD.Rda")
+
+DPA<- FD[, c(1,7,6)]
+
+DPA<- subset(DPA, cond>1) # remove silence
+DPA<- DPA[which(!is.na(DPA$FFD)),] 
+colnames(DPA)<- c("subject", "duration", "condition")
+
+DPA$condition<- DPA$condition-1
+
+DPA<- DPA[with(DPA, order(condition,subject)), ]
+
+# COND 1= standard; COND 2= deviant
+
+write.table(DPA, file= "DPA/DEVS_data_DPA.txt", sep = "\t", quote = F, row.names = F)
+
 #FD$keep<- 0
 
 #for(i in 1:nrow(FD)){
@@ -252,6 +271,12 @@ summary(lmer(log(GD) ~ sound+ (sound|sub)+ (sound|item), data=FD, REML=T))
 summary(lmer(log(TVT) ~ sound +  (sound|sub)+ (sound|item), data=FD, REML=T))
 
 ########################
+
+DesFix<- melt(N1, id=c('sub', 'item', 'cond', 'sound', 'word'), 
+              measure=c("FFD", "SFD", "GD", "TVT"), na.rm=TRUE)
+mTW<- cast(DesFix, sound ~ variable
+           ,function(x) c(M=signif(mean(x),3)
+                          , SD= sd(x) ))
 
 N1$sound<- as.factor(N1$sound)
 N1$sound<- factor(N1$sound, levels= c("STD", "DEV", "SLC"))

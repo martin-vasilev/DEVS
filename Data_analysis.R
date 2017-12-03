@@ -101,6 +101,44 @@ ggsave(Dplot, filename = "Plots/TW.png", width = 7.2, height=7, dpi = 300, units
 dbFD<- subset(FD, sound!="SLC")
 #levels(dbFD$Sound)<- droplevels(dbFD$Sound)
 
+a<- ecdf(dbFD$FFD[dbFD$sound=="STD"])
+d<- sort(unique(dbFD$FFD[dbFD$sound=="STD"]))
+dp<- NULL
+
+b<- ecdf(dbFD$FFD[dbFD$sound=="DEV"])
+d2<- sort(unique(dbFD$FFD[dbFD$sound=="DEV"]))
+dp2<- NULL
+
+for(i in 1:length(d)){
+  dp[i]<- (1- a(d[i]))*100 
+}
+
+for(i in 1:length(d2)){
+  dp2[i]<- (1- b(d2[i]))*100
+}
+
+png('Plots/FFD_SRV.png', width = 8000, height = 4000, units = "px", res=600, type="cairo")
+plot(d, dp, main= "", type= "l", lwd= 1.2,
+     xlab= "First fixation duration [FFD]",
+     ylab= "Survival (%)", family="serif",
+     cex.lab=1.6, cex.axis= 1.6, pch=16,
+     font.lab=2, xlim= c(100, 800))
+abline(h = 0, lty=2, col="#706E6E")
+abline(h = 100, lty=2, col="#706E6E")
+#par(new=F)
+points(d, dp, pch= 16, cex= 0.5)
+
+lines(d2, dp2, col= "darkred")
+points(d2, dp2, pch= 16, col= "darkred", cex= 0.5)
+
+abline(v= 180, col="dark orange", cex= 1.2)
+
+legend(640, 85, legend=c("Standard", "Deviant"),
+       col=c("black", "darkred"), lwd=1.7, cex=1.4)
+
+dev.off()
+##########
+
 png('Plots/FFD_CDF.png', width = 8000, height = 4000, units = "px", res=600, type="cairo")
 plot(ecdf(dbFD$FFD[dbFD$sound=="STD"]), cex=0.7, main= "", xlab= "First fixation duration [FFD]",
      ylab= "Cumulative distribution function (FFD)", family="serif", cex.lab=1.6, cex.axis= 1.6,
@@ -108,6 +146,36 @@ plot(ecdf(dbFD$FFD[dbFD$sound=="STD"]), cex=0.7, main= "", xlab= "First fixation
 plot(ecdf(dbFD$FFD[dbFD$sound=="DEV"]), add=T, col= "darkred", cex=0.7)
 
 legend(665, 0.25, legend=c("Standard", "Deviant"),
+       col=c("black", "darkred"), lwd=4.5, cex=1.4)
+
+dev.off()
+
+
+#### Survival plots:
+std<- ecdf(dbFD$FFD[dbFD$sound=="STD"])
+dev<-  ecdf(dbFD$FFD[dbFD$sound=="DEV"]) 
+
+S_std<-NULL
+S_dev<- NULL
+rng<- 80:800
+
+
+for(i in 1:length(rng)){
+  S_std[i]<- 1- std(rng[i])
+  S_dev[i]<- 1- dev(rng[i])
+}
+
+png('Plots/Survival.png', width = 6000, height = 3000, units = "px", res=600, type="cairo")
+plot(rng, S_std, main= "", type= "l", lwd= 1.2,
+     xlab= "First fixation duration [FFD]",
+     ylab= "Survival (%)", family="serif",
+     cex.lab=1.6, cex.axis= 1.6, pch=16,
+     font.lab=2)
+par(new=TRUE)
+plot(rng, S_dev, col= "darkred", lwd=1.2, axes= FALSE, xlab= '', ylab= '', type= 'l')
+abline(v= 180, col= "darkorange")
+# 219 original DPA
+legend(640, 0.95, legend=c("Standard", "Deviant"),
        col=c("black", "darkred"), lwd=4.5, cex=1.4)
 
 dev.off()
@@ -225,6 +293,8 @@ contrasts(sound_check$sound_type)
 summary(glmer(N1reg ~ sound_type + (sound_type|sub)+ (1|item), data=sound_check, family= binomial))
 
 
+
+
 ### Where do they land after regression?
 
 R<- subset(sound_check, N1reg==1)
@@ -241,6 +311,22 @@ for(i in 1:nrow(R)){
   }
 
 }
+
+DesLen<- melt(R, id=c('sub', 'item', 'cond', 'sound_type'), 
+              measure=c("sacc_len"), na.rm=TRUE)
+mLen<- cast(DesLen, sound_type ~ variable
+            ,function(x) c(M=signif(mean(x),3)
+                           , SD= sd(x) ))
+R$sound_type<- as.factor(R$sound_type)
+R$sound_type<- factor(R$sound_type, levels= c("STD", "DEV", "SLC"))
+contrasts(R$sound_type)
+
+summary(lmer(sacc_len ~ sound_type + (1|sub)+ (1|item), data=R, REML=T))
+
+###### Next fixation:
+
+summary(lmer(log(N2) ~ sound_type + (1|sub)+ (1|item),
+             data=sound_check, REML=T))
 
 ############### length:
 
@@ -384,26 +470,42 @@ summary(mGEN<-lmer(nfixAll ~  sound+ (0+sound|sub)+ (1|item),
 ###### lexical frequency:
 library(readr)
 freq <- read_delim("freq.txt", "\t", escape_double = FALSE, trim_ws = TRUE)
-
+freq$len<- nchar(freq$Critical_word)
 FD$Zipf<- NULL
 FD$freq<- NULL
+FD$length<- NULL
 
 for(i in 1:nrow(FD)){
   a<- which(freq$item== FD$item[i] & freq$word== FD$word[i])
   FD$Zipf[i]<- freq$Zipf[a]
   FD$freq[i]<- freq$Freq_mil[a]
+  FD$length[i]<- freq$len[a]
 }
 
-FD$freq<- log10(FD$freq)
+FD$freq<- log(FD$freq)
 
-summary(freqFFD<-lmer(log(FFD) ~  freq+ sound+ freq:sound+ (freq+sound|sub)+ (freq|item),
-                      data=FD, REML=T))
-summary(freqSFD<-lmer(log(SFD) ~ freq+ freq:sound+ (freq+sound|sub)+ (freq|item),
-                      data=FD, REML=T))
-summary(freqGD<- lmer(log(GD) ~  freq+ freq:sound+ (freq+sound|sub)+ (freq|item),
-                      data=FD, REML=T))
-summary(freqTVT<-lmer(log(TVT) ~ freq+ freq:sound+ (freq|sub)+ (freq|item),
-                      data=FD, REML=T))
+#summary(freqFFD<-lmer(log(FFD) ~  freq+ sound+ freq:sound+ (freq+sound|sub)+ (freq|item),
+#                      data=FD, REML=T))
+#summary(freqSFD<-lmer(log(SFD) ~ freq+ freq:sound+ (freq+sound|sub)+ (freq|item),
+#                      data=FD, REML=T))
+#summary(freqGD<- lmer(log(GD) ~  freq+ freq:sound+ (freq+sound|sub)+ (freq|item),
+#                      data=FD, REML=T))
+#summary(freqTVT<-lmer(log(TVT) ~ freq+ freq:sound+ (freq|sub)+ (freq|item),
+#                      data=FD, REML=T))
+
+
+####
+summary(freqFFD<-lmer(log(FFD) ~  freq+ sound+ sound: freq+
+                        (sound|sub) +(1|item),data=FD, REML=T))
+
+summary(freqSFD<-lmer(log(SFD) ~  freq+ sound+ sound: freq+
+                        (sound|sub) +(1|item),data=FD, REML=T))
+
+summary(freqGD<-lmer(log(GD) ~  freq+ sound+ sound: freq+
+                        (sound|sub) +(1|item),data=FD, REML=T))
+
+summary(freqTVT<-lmer(log(TVT) ~  freq+ sound+ sound: freq+
+                        (sound|sub) +(1|item),data=FD, REML=T))
 
 library(effects)
 
@@ -419,3 +521,28 @@ plot(effect(c('freq:sound'),freqGD), family='serif', main= "Lexical frequency x 
 
 plot(effect(c('freq:sound'),freqTVT), family='serif', main= "Lexical frequency x Sound [SFD]", 
      xlab= "log(Lexical frequency)")
+
+
+
+
+################
+
+FixN$refix<- NULL
+
+for(i in 1:nrow(FixN)){
+  if(FixN$nfix1[i]>1){
+    FixN$refix[i]<- 1
+  }else{
+    FixN$refix[i]<- 0
+  }
+}
+
+
+DesRefix<- melt(FixN, id=c('sub', 'item', 'cond'), 
+               measure=c("refix"), na.rm=TRUE)
+mRefix<- cast(DesRefix, cond ~ variable
+             ,function(x) c(M=signif(mean(x),3)
+                            , SD= sd(x) ))
+
+
+summary(glmer(refix ~ sound + (1|sub)+ (1|item), data=FixN, family= binomial))

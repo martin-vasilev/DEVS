@@ -1,0 +1,25 @@
+November 25, 2014
+
+Instructions:
+
+The input data file must be a .txt file (Tab Delimited). The data must be ordered by the participant number (in ascending order, starting with participant 1), and each row represents a single trial or fixation duration in the experiment. I will describe the contents of each of the three columns below. Please see the sample data file for an example (“Simulated_DPA_Sample_Data.txt”)
+
+Content of the .txt data input file (“Simulated_DPA_Sample_Data.txt”):
+subject - participant number (the data must be organised in ascending order of participant, starting with 1)
+duration - the duration of the fixation, in ms
+condition - 1 = fast condition; 2 = slow condition
+
+The folder contains three different survival analysis scripts, which correspond to the three techniques described by Reingold and Sheridan (Frontiers in Psychology)
+
+Original DPA Procedure (Original-DPA)
+Confidence Interval DPA procedure (CI-DPA)
+Individual Participant DPA procedure (IP-DPA)
+
+Note that the Original-DPA and CI-DPA scripts will output the results to the command window, and the IP-DPA script will output the results to a .txt file (“DPA_IP_Simulated_Output.txt”).
+
+For information purposes, the folder also contains a .txt file with the simulated divergence points for each of the 104 participants (See Simulation 2 in the text for further details).
+Content of the .txt simulated divergence points file (“Simulated_divergence_points.txt”):
+subject - participant number (range = 1 to 104)
+simulated_divergence_point - simulated divergence point values (range = 110-210 ms)
+
+If you have any questions about the scripts, please contact Heather Sheridan (sheridhr@gmail.com)
