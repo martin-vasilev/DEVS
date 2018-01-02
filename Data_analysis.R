@@ -421,7 +421,7 @@ summary(mFD<-lmer(log(fix_dur) ~ sound +  (sound|sub)+ (1|item), data=raw_fix, R
 
 # saccade length:
 # does not converge with random slopes
-summary(mSL<-lmer(log(sacc_len) ~ sound +  (1|sub)+ (1|item), data=raw_fix, REML=T))
+summary(mSL<-lmer(log(sacc_len) ~ sound +  (0+sound|sub)+ (1|item), data=raw_fix, REML=T))
 
 
 # Sentence reading time:
@@ -495,6 +495,9 @@ FD$freq<- log(FD$freq)
 
 
 ####
+
+FD$word<- as.factor(FD$word)
+
 summary(freqFFD<-lmer(log(FFD) ~  freq+ sound+ sound: freq+
                         (sound|sub) +(1|item),data=FD, REML=T))
 
@@ -546,3 +549,7 @@ mRefix<- cast(DesRefix, cond ~ variable
 
 
 summary(glmer(refix ~ sound + (1|sub)+ (1|item), data=FixN, family= binomial))
+
+
+### Percent of single fixation cases during first pass reading
+(length(which(FD$FFD== FD$SFD))/nrow(subset(FD, !is.na(FFD))))*100
