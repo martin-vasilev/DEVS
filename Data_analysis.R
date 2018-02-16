@@ -502,10 +502,11 @@ summary(freqSFD<-lmer(log(SFD) ~  sound*freq+
                         (sound|sub) +(1|item),data=FD, REML=T))
 
 summary(freqGD<-lmer(log(GD) ~  sound*freq+
-                        (sound|sub) +(1|item),data=FD, REML=T))
+                        (sound|sub) +(sound|item),data=FD, REML=T))
 
 summary(freqTVT<-lmer(log(TVT) ~  sound*freq+
                         (sound|sub) +(1|item),data=FD, REML=T))
+# TVT does not converge with a random slope for items
 
 library(effects)
 
