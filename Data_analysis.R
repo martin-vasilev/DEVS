@@ -4,6 +4,12 @@ rm(list=ls())
 load("data/sound_check.Rda")
 
 
+
+### sound timing:
+m<- subset(sound_check, onTarget=="Yes")
+
+mean(m$delFix)
+sd(m$delFix)
 ###### Sound timing plots:
 
 png('Plots/sound_timing.png', width = 6000, height = 2500, units = "px", res=600, type="cairo")
@@ -117,7 +123,7 @@ for(i in 1:length(d2)){
   dp2[i]<- (1- b(d2[i]))*100
 }
 
-png('Plots/FFD_SRV.png', width = 8000, height = 4000, units = "px", res=600, type="cairo")
+png('Plots/FFD_SRV.png', width = 6000, height = 5000, units = "px", res=600, type="cairo")
 plot(d, dp, main= "", type= "l", lwd= 1.2,
      xlab= "First fixation duration [FFD]",
      ylab= "Survival (%)", family="serif",
@@ -131,10 +137,10 @@ points(d, dp, pch= 16, cex= 0.5)
 lines(d2, dp2, col= "darkred")
 points(d2, dp2, pch= 16, col= "darkred", cex= 0.5)
 
-abline(v= 180, col="dark orange", cex= 1.2)
+abline(v= 180, col="dark orange", lwd= 2)
 
-legend(640, 85, legend=c("Standard", "Deviant"),
-       col=c("black", "darkred"), lwd=1.7, cex=1.4)
+legend(600, 85, legend=c("Standard", "Deviant"),
+       col=c("black", "darkred"), lwd=2.5, cex=1.4)
 
 dev.off()
 ##########
@@ -481,7 +487,8 @@ for(i in 1:nrow(FD)){
   FD$freq[i]<- freq$Freq_mil[a]
   FD$length[i]<- freq$len[a]
 }
-
+FD$freq10<- log10(FD$freq)
+FD$zfreq<- scale(FD$freq)
 FD$freq<- log(FD$freq)
 
 #summary(freqFFD<-lmer(log(FFD) ~  freq+ sound+ freq:sound+ (freq+sound|sub)+ (freq|item),
@@ -498,33 +505,26 @@ FD$freq<- log(FD$freq)
 
 FD$word<- as.factor(FD$word)
 
-summary(freqFFD<-lmer(log(FFD) ~  freq+ sound+ sound: freq+
+summary(freqFFD<-lmer(log(FFD) ~  sound*freq+
                         (sound|sub) +(1|item),data=FD, REML=T))
 
-summary(freqSFD<-lmer(log(SFD) ~  freq+ sound+ sound: freq+
+summary(freqSFD<-lmer(log(SFD) ~  sound*freq+
                         (sound|sub) +(1|item),data=FD, REML=T))
 
-summary(freqGD<-lmer(log(GD) ~  freq+ sound+ sound: freq+
+summary(freqGD<-lmer(log(GD) ~  sound*freq+
                         (sound|sub) +(1|item),data=FD, REML=T))
 
-summary(freqTVT<-lmer(log(TVT) ~  freq+ sound+ sound: freq+
+summary(freqTVT<-lmer(log(TVT) ~  sound*freq+
                         (sound|sub) +(1|item),data=FD, REML=T))
 
 library(effects)
 
 
-plot(effect(c('freq:sound'),freqFFD), family='serif', main= "Lexical frequency x Sound [FFD]", 
+plot(effect(c('freq'),freqGD), family='serif', main= "Lexical frequency x Sound [FFD]", 
      xlab= "log(Lexical frequency)", cex = 2.4)
 
-plot(effect(c('freq:sound'),freqSFD), family='serif', main= "Lexical frequency x Sound [SFD]", 
-     xlab= "log(Lexical frequency)")
-
-plot(effect(c('freq:sound'),freqGD), family='serif', main= "Lexical frequency x Sound [SFD]", 
-     xlab= "log(Lexical frequency)")
-
-plot(effect(c('freq:sound'),freqTVT), family='serif', main= "Lexical frequency x Sound [SFD]", 
-     xlab= "log(Lexical frequency)")
-
+plot(effect(c('sound'),freqGD), family='serif', main= "Lexical frequency x Sound [FFD]", 
+     xlab= "log(Lexical frequency)", cex = 2.4)
 
 
 
