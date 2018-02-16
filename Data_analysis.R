@@ -487,19 +487,9 @@ for(i in 1:nrow(FD)){
   FD$freq[i]<- freq$Freq_mil[a]
   FD$length[i]<- freq$len[a]
 }
-FD$freq10<- log10(FD$freq)
-FD$zfreq<- scale(FD$freq)
-FD$freq<- log(FD$freq)
 
-#summary(freqFFD<-lmer(log(FFD) ~  freq+ sound+ freq:sound+ (freq+sound|sub)+ (freq|item),
-#                      data=FD, REML=T))
-#summary(freqSFD<-lmer(log(SFD) ~ freq+ freq:sound+ (freq+sound|sub)+ (freq|item),
-#                      data=FD, REML=T))
-#summary(freqGD<- lmer(log(GD) ~  freq+ freq:sound+ (freq+sound|sub)+ (freq|item),
-#                      data=FD, REML=T))
-#summary(freqTVT<-lmer(log(TVT) ~ freq+ freq:sound+ (freq|sub)+ (freq|item),
-#                      data=FD, REML=T))
-
+FD$freq<- log(FD$freq) # log-transform frequency
+FD$freq<- scale(FD$freq) # centre it to avoid multicollinearity issues
 
 ####
 
@@ -526,6 +516,8 @@ plot(effect(c('freq'),freqGD), family='serif', main= "Lexical frequency x Sound 
 plot(effect(c('sound'),freqGD), family='serif', main= "Lexical frequency x Sound [FFD]", 
      xlab= "log(Lexical frequency)", cex = 2.4)
 
+plot(effect(c('sound:freq'),freqGD), family='serif', main= "Lexical frequency x Sound [FFD]", 
+     xlab= "log(Lexical frequency)", cex = 2.4)
 
 
 ################
@@ -546,7 +538,6 @@ DesRefix<- melt(FixN, id=c('sub', 'item', 'cond'),
 mRefix<- cast(DesRefix, cond ~ variable
              ,function(x) c(M=signif(mean(x),3)
                             , SD= sd(x) ))
-
 
 summary(glmer(refix ~ sound + (1|sub)+ (1|item), data=FixN, family= binomial))
 
