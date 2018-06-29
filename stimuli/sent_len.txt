@@ -1,0 +1,125 @@
+New_ID	ID	Sentence	nword
+1	1	The couple bought another carpet for their living room before returning home from shopping.	14
+2	2	Theodore eventually found the right road after getting lost twice driving his car in the area.	16
+3	5	The teenagers used the private area behind the apartments to practise playing basketball.	13
+4	8	Susan contemplated buying the antique painting when she visited the auction house in the capital.	15
+5	11	Cathy was nervous about giving the short speech before the panel of judges.	13
+6	14	The midwife admired the serene baby following the difficult birth earlier in the day.	14
+7	18	The cook ordered the fresh organic fruits to support the farmers who produce them locally.	15
+8	22	The mayor stepped down after his insensitive comments created a social media scandal.	13
+9	26	"Yesterday, Nicole made a brief comment concerning her manager that caused a scandal."	13
+10	28	"Without her glasses, Margaret struggled to read the road signs during her driving test."	14
+11	30	The workers replaced the faulty bathtub which had caused the entire first floor to be flooded.	16
+12	34	The clever merchant invested money in real estate during the financial crisis that shook the market.	16
+13	39	"Katy remained positive, despite facing financial problems that threatened to ruin her business."	13
+14	3	Carmen couldn't find her yellow shirt when she unpacked her clothes from the trip.	14
+15	4	His mother purchased the crimson cottage after going through many online ads for a summer home.	16
+16	6	"When the issue was discovered, the employee unwisely took the blame for the incident."	14
+17	7	The officer started his investigation by questioning any witnesses who might have seen the perpetrator.	15
+18	9	"For the position, only competent and experienced candidates would be invited for an interview."	14
+19	10	The young author didn?t realise that writing her article would cause so much controversy.	14
+20	12	The new hotel had impressive dining halls that featured expensive pieces of art.	13
+21	13	"The loud construction noise annoyed many residents, who preferred to spend a quiet afternoon at home."	16
+22	15	The lawyers criticised the latest report because it provided no useful evidence for the case.	15
+23	16	"The forecast warned about strong winds, accompanied by occasional rain, throughout most of the day."	15
+24	17	They debated whether using better surveillance equipment would deter potential thieves and improve security.	14
+25	19	The child pestered the yellow fish that was hiding behind pondweed leaves in the aquarium.	15
+26	20	The witness remembered very clearly the brown leather jacket that belonged to the suspect.	14
+27	21	The detective noted the evasive statement that Sam gave to explain his suspicious behaviour.	14
+28	23	The waitress assured the customer that every food item was prepared from fresh ingredients.	14
+29	24	The players remained focused despite initially losing the first three rounds of the game.	14
+30	25	The student lost points because she used faulty reasoning to explain the concept.	13
+31	27	The increasing number of cyber crime offences has prompted discussions about tougher laws.	13
+32	29	The residents? peace was disturbed by thousands of visitors who flocked to the town centre.	15
+33	31	The technician provided expert knowledge that helped locate suspects in connection with the robbery.	14
+34	32	The new street was designed to reduce traffic congestion and improve safety for all road users.	16
+35	33	The old lady needed somebody to help her clean the spacious three-bedroom flat.	13
+36	35	The small hotel was known for providing cheap accommodation and good quality service.	13
+37	36	The candidate wanted to appeal to every media following the election campaign this year.	14
+38	37	The general examined the evidence of military drills conducted in secret by the enemy.	14
+39	38	The central bank published revised regulations regarding foreign currency and money transfers from abroad.	14
+40	40	The landlord made the decision to sell his property and retire to the countryside.	14
+41	42	The brave little boy tried to rescue the dog which couldn?t get out of the river.	16
+42	43	"Surprisingly, the trip was cancelled after reports of unrest caused concern among the organisers."	14
+43	46	Some local farmers received money from government programmes because they wanted to buy more land.	15
+44	50	The enormous cave is largely unexplored because it's remote location makes it difficult to reach. 	15
+45	53	"Melissa decided against going home after work and, instead, took salsa lessons with her friends."	15
+46	55	"To Jane?s surprise, the flower somehow managed to survive the blazing heat with very little water."	16
+47	58	The taxi driver had trouble finding customers and decided to call it a day.	14
+48	60	The doctor examined the patient who complained of constant headaches during the past week.	14
+49	64	The scientists investigated the bright energy bursts that appeared to come from outer space.	14
+50	66	"Because the road looked steep and difficult to climb, the cyclists pushed their bikes."	14
+51	71	The president wants to stay in politics after completing his term later this year.	14
+52	76	Kristin was surprised to receive an honourable mention during the prize award ceremony.	13
+53	77	The car engine problems started because someone had damaged a valve during the maintenance.	14
+54	41	Hannah enjoyed visiting the Museum of Modern Art during her holiday in the USA.	14
+55	44	The beautiful island was unknown to most people visiting the tropical country due to its small size.	17
+56	45	The start-up company scored record high sales soon after it opened for business.	13
+57	47	The reclusive monastery had hardly any contact with outsiders and maintained a simple way of life.	16
+58	48	The students learned how computer programs could soon assist medical staff with making diagnoses.	14
+59	49	The water supply was interrupted while works were underway to replace an old pipe.	14
+60	51	The documentery showed a series of crime cases which remain unsolved until today.	13
+61	52	The mountain trail was steep and difficult to navigate without proper climbing gear.	13
+62	54	John always admired the courage his brother showed when facing difficult situations in life.	14
+63	56	The admiral ordered his troops to investigate the strange signal detected from the seabed.	14
+64	57	Many endangered species will receive much needed protection once the natural reserve is open.	14
+65	59	The flight attendant was offered her position after completing a long training programme.	13
+66	61	The client asked for another evening dress that matched her velvet boutique shoes.	13
+67	62	The government tried to support the interest in solar power technology in the private sector.	15
+68	63	"The buffet offered many different food options, which included both continental and British meals."	14
+69	65	"Because the weather was cold and windy, the children weren?t allowed to play outside."	14
+70	67	The landlady asked the tenants to keep the house clean during their stay there.	14
+71	68	The couple celebrated their tenth wedding anniversary by visiting the place where they first met.	15
+72	69	The new computer factory promised to create more jobs and attract specialists from nearby towns.	15
+73	70	The charity tried to raise more money for improving healthcare facilities in developing countries.	14
+74	72	The supermarket chain had ambitions to expand their operation to nearby countries in the future.	15
+75	73	The club aimed to foster cultural awareness and friendship among people of different nations.	14
+76	74	The strong currency attracted investments from foreign companies interested in expanding their business.	13
+77	75	The young mother was tired of seeing her children play pranks on each other all the time.	17
+78	78	The campers realised that forested areas offer better protection from wild animals and mosquitoes.	14
+79	79	The severe drought affected many farmers despite the water irrigation systems that were installed.	14
+80	80	The heavy rain storm forced some businesses in town to remain closed after the streets were flooded.	17
+81	81	The poet spent the whole summer writing short stories for another book project.	13
+82	84	"The mission failed to uncover the enormous pirate treasure, which some believe is buried in the ocean."	17
+83	86	The journalist finished her assignment and prepared several good questions before the interview.	13
+84	89	The forest fire spread quickly and gave the firefighters little time to bring it under control.	16
+85	91	The reporters covering the case were barred from entering the courtroom during the first hearing.	15
+86	94	The old mine was finally shut down after decades of digging had completely exhausted it.	15
+87	97	"The mathematical proof was clever, but difficult to understand for most of the scientists."	14
+88	100	The school children enjoyed visiting the Museum of Natural History during their trip to the capital.	16
+89	104	The couple ordered a double cheese pizza after deciding to spend the night at home.	15
+90	107	Mary always devoted some time to helping her parents with household chores during the weekend.	15
+91	109	The paper factory was temporarily closed following several health and safety violations this year.	14
+92	116	"During the latest press conference, the mayor revealed plans to build a cinema complex."	14
+93	119	The seismic activity worried government officials because it signalled a possible volcanic eruption.	13
+94	82	The new church was built with donations from companies and members of the public.	14
+95	83	"The green park attracted many city dwellers, who wanted to enjoy the summer days outside."	15
+96	85	Plans to build the final underground station were scrapped after historical ruins were unearthed.	14
+97	87	The instructor demonstrated the technique for passing the ball to another player on the field.	15
+98	88	The art gallery was recently renovated thanks to funding from wealthy benefactors from the region.	15
+99	90	The old gravel road outside of town was perfect for mountain bike competitions.	13
+100	92	The nurse conducted the required tests diligently and informed the doctor about the results.	14
+101	93	The children practised their lines regularly before the school play which had been organised for their parents.	17
+102	95	The Arctic outpost was impossible to reach without helicopters that could fly there.	13
+103	96	The deep canyon was formed over hundreds of thousands of years due to erosion of the rocks.	17
+104	98	The peaceful protest quickly turned violent after two groups of demonstrators started fighting.	13
+105	99	"The beautiful lake was popular among hikers, who would usually camp there in the evening."	15
+106	101	The music festival was overpriced but many fans still bought tickets to attend the event.	15
+107	102	The multinational company was convicted of insurance fraud after secret documents were leaked to the press.	16
+108	103	The light breeze outside made it easier to bear the summer heat during the day.	15
+109	105	The local florist had decades of experience in making quick deliveries for different celebrations.	14
+110	106	The new book was published in electronic format because most readers use mobile devices.	14
+111	108	The principal changed his clothes after large coffee stains completely ruined his outfit.	13
+112	110	The old library was moved to another building because space restrictions made it hard to store new books.	18
+113	111	The annual swimming competition became a major success when one thousand people took part.	14
+114	112	The ancient forest was closely protected because it contained the oldest trees on Earth.	14
+115	113	"Surprisingly, the movie sequel received better reviews from film critics compared to the original."	14
+116	114	The small archipelago had long produced various exotic spices and exported them abroad.	13
+117	115	The precious stone was found by children playing near the rapid mountain stream.	13
+118	117	The remote village was long abandoned because all residents had moved to nearby towns.	14
+119	118	The tourist town was mostly deserted during the long winter months when businesses closed down.	15
+120	120	Many citizens opposed the plans to invest in nuclear power plants due to their environmental impact.	16
+			
+			
+			13
+			18

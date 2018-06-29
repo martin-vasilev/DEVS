@@ -367,3 +367,156 @@ contrasts(GenFix$sound)
 
 summary(mGEN<-lmer(nfixAll ~  sound+ (0+sound|sub)+ (1|item),
                       data=GenFix, REML=F))
+
+
+#######
+# Slow vs fast readers:
+
+load("data/raw_fix.Rda")
+
+
+source("functions/trial_time.R")
+t<- trial_time()
+save(t, file= "data/t.Rda")
+
+t<- subset(t, item<121)
+
+# get number of words in sentence to calculate reading speed:
+library(readr)
+sent_len <- read_delim("~/DEVS/stimuli/sent_len.txt", 
+                            "\t", escape_double = FALSE, trim_ws = TRUE)
+sent_len$New_ID<- NULL
+
+t$len<- NA
+for(i in 1:nrow(t)){
+  t$len[i]<- sent_len$nword[t$item[i]]
+}
+
+# calculate words per minute:
+t$dur<- t$dur/(1000*60) # convert time to minute
+# wpm = n words/ time (m):
+t$wpm<- t$len/t$dur
+
+# calculate mean reading speed per subject:
+DesSRT3<- melt(t, id=c('sub', 'item', 'cond'), 
+              measure=c("wpm"), na.rm=TRUE)
+SRT2<- cast(DesSRT3, sub ~ variable
+            ,function(x) c(M=signif(mean(x),3)
+                           , SD= sd(x) ))
+
+# get median reading speed:
+medSpeed<- median(SRT2$wpm_M)
+
+# Do a median split of fast and slow readers based on reading speed:
+SRT2$reader<- NA
+
+for(i in 1:nrow(SRT2)){
+  if(SRT2$wpm_M[i]<= medSpeed){
+    SRT2$reader[i]<- "slow"
+  }else{
+    SRT2$reader[i]<- "fast"
+  }
+}
+
+table(SRT2$reader) # even group number
+
+slow<- SRT2$sub[which(SRT2$reader== "slow")]
+
+
+##########
+
+# add reader type to fixations:
+
+load("data/FD.Rda")
+
+FD$reader<- NA
+
+for(i in 1:nrow(FD)){
+  if(is.element(FD$sub[i], slow)){
+    FD$reader[i]<- "slow"
+  }else{
+    FD$reader[i]<- "fast"
+  }
+}
+
+
+library(reshape)
+
+DesFix<- melt(FD, id=c('sub', 'item', 'cond', 'sound', 'reader'), 
+              measure=c("FFD", "SFD", "GD", "TVT"), na.rm=TRUE)
+mFix<- cast(DesFix, sound+ reader ~ variable
+            , function(x) c(M=signif(mean(x),3)
+                            , SD= sd(x) ))
+
+### plot:
+
+
+library(ggplot2)
+
+db<- data.frame(c(mFix$FFD_M, mFix$SFD_M, mFix$GD_M, mFix$TVT_M),
+                c(mFix$FFD_SD, mFix$SFD_SD, mFix$GD_SD, mFix$TVT_SD),
+                c(rep("FFD",6), rep("SFD",6),  rep("GD",6), rep("TVT",6)), 
+                rep(c("Deviant", "Deviant", "Silence","Silence",
+                      "Standard", "Standard"),4), rep(c("fast", "slow"), 12))
+
+colnames(db)<- c("Mean", "SD", "Measure", "Sound", "Reader")
+db$SE<- db$SD/sqrt(length(unique(FD$sub)))
+
+
+db$Measure<- factor(db$Measure, levels= c("FFD", "SFD", "GD", "TVT"))
+
+db$Sound<- factor(db$Sound, levels= c("Silence", "Standard", "Deviant"))
+
+library(ggplot2)
+
+#limits <- aes(ymax = db$Mean + db$SE, ymin=db$Mean - db$SE)
+
+Dplot<- ggplot(data= db, aes(x=Sound, y= Mean, color=Reader, 
+                             fill= Reader, group= Reader, shape= Reader,
+                             linetype= Reader))+ 
+  scale_fill_brewer(palette="Dark2")+ 
+  scale_colour_brewer(palette="Dark2")+
+  theme_bw() + theme(panel.grid.major = element_line(colour = "#E3E5E6", size=0.7), 
+                     axis.line = element_line(colour = "black", size=1),
+                     panel.border = element_rect(colour = "black", size=1, fill = NA))+
+  geom_line(size=2)+
+  geom_point(size=7)+ 
+  xlab("\n Background sound")+ ylab("Mean fixation duration (in ms)")+ 
+  theme(legend.position= "bottom", legend.title=element_text(size=20,
+                                                             face="bold", family="serif"),
+        legend.text=element_text(size=20,family="serif"),legend.key.width=unit(2,"cm"),
+        legend.key.height=unit(1,"cm"), strip.text=element_text(size=20, family="serif"),
+        title=element_text(size=20, family="serif"),
+        axis.title.x = element_text(size=20, face="bold", family="serif"),
+        axis.title.y = element_text(size=20, face="bold", family="serif"), 
+        axis.text=element_text(size=20, family="serif"), 
+        panel.border = element_rect(linetype = "solid", colour = "black"), 
+        legend.key = element_rect(colour = "#000000", size=1))+
+        facet_grid(.~ Measure)+geom_ribbon(aes(ymax= Mean +SE, ymin= Mean- SE),
+                                          alpha=0.07, colour=NA)
+
+ggsave(Dplot, filename = "Plots/Reader.png", width = 15, height=7, dpi = 300, units = "in")
+
+
+
+FD$sound<- as.factor(FD$sound)
+FD$sound<- factor(FD$sound, levels= c("STD", "DEV", "SLC"))
+contrasts(FD$sound)
+
+FD$reader<- as.factor(FD$reader)
+contrasts(FD$reader)<- c(-1, 1)
+
+library(lme4)
+
+summary(mSFD<-lmer(log(SFD) ~ sound*reader +  (sound|sub)+ (1|item), data=FD, REML=T))
+summary(mFFD<-lmer(log(FFD) ~ sound*reader +  (sound|sub)+ (1|item) , data=FD, REML=T))
+summary(mGD<-lmer(log(GD) ~ sound*reader+ (sound|sub)+ (sound|item), data=FD, REML=T))
+summary(mTVT<-lmer(log(TVT) ~ sound*reader +  (sound|sub)+ (1|item), data=FD, REML=T))
+
+##################
+
+summary(mSFD<-lmer(log(SFD) ~ sound*reader +  (sound|sub)+ (1|item), data=FD, REML=T))
+summary(mFFD<-lmer(log(FFD) ~ sound*reader +  (sound|sub)+ (1|item) , data=FD, REML=T))
+summary(mGD<-lmer(log(GD) ~ sound*reader+ (sound|sub)+ (sound|item), data=FD, REML=T))
+summary(mTVT<-lmer(log(TVT) ~ sound*reader +  (sound|sub)+ (1|item), data=FD, REML=T))
+
