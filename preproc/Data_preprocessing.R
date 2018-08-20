@@ -5,7 +5,7 @@ rm(list=ls())
 
 source("functions/soundCheck.R")
 
-sound_check<- soundCheck()
+sound_check<- soundCheck(list_asc = "preproc/files_laptop.txt")
 
 sound_check<- subset(sound_check, sound!=1)
 
@@ -34,7 +34,7 @@ sound_check$Trialt<- sound_check$trialEnd- sound_check$trialStart
 # further development:
 # CHANGE DEFINITION OF HOOK!: crossing is not a hook if next fix is within 1 ppl 
 
-save(sound_check, file= "preproc/sound_check.Rda")
+save(sound_check, file= "preproc/sound_check_t.Rda")
 write.csv(sound_check, "preproc/sound_check.csv")
 
 
@@ -87,7 +87,7 @@ source("functions/less80.R")
 raw_fix<- less80(raw_fix)
 l80<- which(raw_fix$fix_dur<80)
 raw_fix<- raw_fix[-l80,]
-
+save(raw_fix, file= "data/raw_fix_temp.Rda")
 #source('functions/map_by_pos.R')
 #MF<- map_by_pos(raw_fix)
 
@@ -96,6 +96,7 @@ raw_fix$sound<- NA
 source("functions/reading_times.R")
 FD<- reading_measures(raw_fix)
 #FD<- reading_measures(MF)
+save(FD, file= 'data/FD_temp.Rda')
 
 out<- which(FD$FFD>800 | FD$GD>2000 | FD$TVT>4000)
 a<- FD[out,]
@@ -126,7 +127,11 @@ for(i in 1:nrow(FD)){
 TW<- subset(FD, keep==1)
 N1<- subset(FD, keepN1==1)
 
+
 FD<- TW
+#out<- which(FD$FFD>800 | FD$GD>2000 | FD$TVT>4000)
+#a<- FD[out,]
+
 save(FD, file='data/FD.Rda')
 save(N1, file='data/N1.Rda')
 

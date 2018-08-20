@@ -1,7 +1,7 @@
 
 # Martin R. Vasilev, 2017
 
-paraFix<- function(data_list= "preproc/files.txt", ResX= 1920, ResY=1080, maxtrial= 120, align=TRUE, plot=TRUE, keepLastFix=TRUE){
+paraFix<- function(data_list= "preproc/files_laptop.txt", ResX= 1920, ResY=1080, maxtrial= 120, align=TRUE, plot=TRUE, keepLastFix=TRUE){
   
   # Load functions:
   source("functions/utility.R")

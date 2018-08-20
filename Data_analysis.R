@@ -545,3 +545,32 @@ summary(glmer(refix ~ sound + (1|sub)+ (1|item), data=FixN, family= binomial))
 
 ### Percent of single fixation cases during first pass reading
 (length(which(FD$FFD== FD$SFD))/nrow(subset(FD, !is.na(FFD))))*100
+
+
+# calculate es:
+source("https://raw.githubusercontent.com/martin-vasilev/reading_sounds/master/Functions/effect_sizes.R")
+
+DesFix<- melt(FD, id=c('sub', 'item', 'cond', 'sound'), 
+              measure=c("FFD", "SFD", "GD", "TVT"), na.rm=TRUE)
+mFix2<- cast(DesFix, sound+sub ~ variable
+            , function(x) c(M=signif(mean(x),3)
+                            , SD= sd(x) ))
+
+
+
+
+# FFD:
+Ttest_to_d(t= 2.02, n= 48, design= "within", r= 0.77)
+
+# SFD:
+Ttest_to_d(t= 2.43, n= 48, design= "within", r= 0.65)
+
+# GD:
+Ttest_to_d(t= 2.8, n= 48, design= "within", r= 0.87)
+
+# TVT:
+Ttest_to_d(t= 2.16, n= 48, design= "within", r= 0.84)
+
+# sacc:
+
+Ttest_to_d(t= 1.96, n= 48, design= "within", r= 0.61)

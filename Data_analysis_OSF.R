@@ -176,10 +176,13 @@ summary(glmer(accuracy ~ sentcond + (1|subject)+ (1|item),  family= binomial, da
 
 ##########
 ##### Target word LMMs:
+library(MASS)
 
 FD$sound<- as.factor(FD$sound)
-FD$sound<- factor(FD$sound, levels= c("STD", "DEV", "SLC"))
-contrasts(FD$sound)
+#FD$sound<- factor(FD$sound, levels= c("STD", "DEV", "SLC"))
+FD$sound<- factor(FD$sound, levels= c("SLC", "STD", "DEV"))
+#contrasts(FD$sound)
+contrasts(FD$sound)<-contr.sdif(3)
 
 library(lme4)
 
@@ -514,9 +517,62 @@ summary(mGD<-lmer(log(GD) ~ sound*reader+ (sound|sub)+ (sound|item), data=FD, RE
 summary(mTVT<-lmer(log(TVT) ~ sound*reader +  (sound|sub)+ (1|item), data=FD, REML=T))
 
 ##################
+# Fixation durations on the next word after playing a sound:
+load("data/N1.Rda")
 
-summary(mSFD<-lmer(log(SFD) ~ sound*reader +  (sound|sub)+ (1|item), data=FD, REML=T))
-summary(mFFD<-lmer(log(FFD) ~ sound*reader +  (sound|sub)+ (1|item) , data=FD, REML=T))
-summary(mGD<-lmer(log(GD) ~ sound*reader+ (sound|sub)+ (sound|item), data=FD, REML=T))
-summary(mTVT<-lmer(log(TVT) ~ sound*reader +  (sound|sub)+ (1|item), data=FD, REML=T))
+library(reshape)
+#FD<- subset(FD,!is.na(sound))
+N1$sound<- as.factor(N1$sound)
+#tw<- subset(FD, is.element(word, c(3,5,7,9,11)))
+
+DesFix<- melt(N1, id=c('sub', 'item', 'cond', 'sound'), 
+              measure=c("FFD", "SFD", "GD", "TVT"), na.rm=TRUE)
+mFixN1<- cast(DesFix, sound ~ variable
+            , function(x) c(M=signif(mean(x),3)
+                            , SD= sd(x) ))
+
+N1$sound<- as.factor(N1$sound)
+N1$sound<- factor(N1$sound, levels= c("STD", "DEV", "SLC"))
+contrasts(N1$sound)
+
+library(lme4)
+
+
+summary(mSFD<-lmer(log(SFD) ~ sound +  (sound|sub)+ (1|item), data=N1, REML=T))
+summary(mFFD<-lmer(log(FFD) ~ sound +  (sound|sub)+ (1|item) , data=N1, REML=T))
+summary(mGD<-lmer(log(GD) ~ sound+ (sound|sub)+ (1|item), data=N1, REML=T))
+summary(mTVT<-lmer(log(TVT) ~ sound +  (1|sub)+ (1|item), data=N1, REML=T))
+
+
+coef(summary(mFFD))
+coef(summary(mSFD))
+coef(summary(mGD))
+coef(summary(mTVT))
+
+
+
+############################
+
+FD$pos<- NA
+
+for(i in 1:nrow(FD)){
+  a<- which(sound_check$sub== FD$sub[i] & sound_check$item== FD$item[i])
+  
+  if(length(a)>0){
+    FD$pos[i]<- sound_check$sound[i]
+  }
+  
+}
+
+FD$sound<- as.factor(FD$sound)
+FD$sound<- factor(FD$sound, levels= c("STD", "DEV", "SLC"))
+contrasts(FD$sound)
+is.numeric(FD$pos)
+# centre word position because otherwise we get multicolienarity issues:
+FD$pos_c<- scale(FD$pos)
+
+summary(mSFD<-lmer(log(SFD) ~ sound*pos_c +  (sound|sub)+ (1|item), data=FD, REML=T))
+summary(mFFD<-lmer(log(FFD) ~ sound*pos_c +  (sound|sub)+ (1|item) , data=FD, REML=T))
+summary(mGD<-lmer(log(GD) ~ sound*pos_c+ (sound|sub)+ (sound|item), data=FD, REML=T))
+summary(mTVT<-lmer(log(TVT) ~ sound*pos_c +  (sound|sub)+ (1|item), data=FD, REML=T))
 
